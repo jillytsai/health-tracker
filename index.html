@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>健康管家 — 血壓 & 用藥紀錄</title>
+<style>
+  :root {
+    --primary: #3b82f6;
+    --primary-dark: #2563eb;
+    --danger: #ef4444;
+    --success: #22c55e;
+    --warning: #f59e0b;
+    --bg: #f0f4f8;
+    --card: #ffffff;
+    --text: #1e293b;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --radius: 12px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  header {
+    background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 100%);
+    color: white;
+    padding: 20px 16px 60px;
+    text-align: center;
+  }
+  header h1 { font-size: 1.6rem; font-weight: 700; }
+  header p  { opacity: .8; font-size: .9rem; margin-top: 4px; }
+
+  /* ── Tabs ── */
+  .tabs {
+    display: flex;
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    box-shadow: 0 2px 8px rgba(0,0,0,.06);
+  }
+  .tab-btn {
+    flex: 1;
+    padding: 14px 8px;
+    border: none;
+    background: none;
+    font-size: .85rem;
+    font-weight: 600;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all .2s;
+  }
+  .tab-btn.active {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+  }
+
+  /* ── Main ── */
+  main { max-width: 600px; margin: 0 auto; padding: 0 12px 80px; }
+
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-top: 16px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.07);
+  }
+  .card-title {
+    font-size: .95rem;
+    font-weight: 700;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* ── Summary bar (top of Dashboard) ── */
+  .summary-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-top: -44px;
+    margin-bottom: 4px;
+  }
+  .summary-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 14px 10px;
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,.10);
+  }
+  .summary-card .val { font-size: 1.5rem; font-weight: 800; color: var(--primary); }
+  .summary-card .lbl { font-size: .72rem; color: var(--muted); margin-top: 2px; }
+
+  /* ── Form ── */
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .form-group { display: flex; flex-direction: column; gap: 4px; }
+  .form-group.full { grid-column: 1 / -1; }
+  label { font-size: .8rem; font-weight: 600; color: var(--muted); }
+  input, select, textarea {
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: .9rem;
+    width: 100%;
+    outline: none;
+    transition: border-color .2s;
+    background: var(--bg);
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--primary); background: white; }
+  textarea { resize: vertical; min-height: 60px; }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 11px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: .9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity .2s, transform .1s;
+  }
+  .btn:active { transform: scale(.97); }
+  .btn-primary { background: var(--primary); color: white; }
+  .btn-primary:hover { background: var(--primary-dark); }
+  .btn-danger { background: var(--danger); color: white; }
+  .btn-sm { padding: 5px 10px; font-size: .78rem; }
+  .btn-full { width: 100%; margin-top: 14px; }
+
+  /* ── BP status badge ── */
+  .bp-badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-size: .72rem;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .bp-normal   { background: #dcfce7; color: #166534; }
+  .bp-elevated { background: #fef9c3; color: #854d0e; }
+  .bp-high1    { background: #fed7aa; color: #9a3412; }
+  .bp-high2    { background: #fecaca; color: #991b1b; }
+  .bp-crisis   { background: #f87171; color: white; }
+
+  /* ── Record list ── */
+  .record-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .record-item:last-child { border-bottom: none; }
+  .record-icon {
+    width: 38px; height: 38px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+  .icon-bp  { background: #dbeafe; }
+  .icon-med { background: #dcfce7; }
+  .record-body { flex: 1; min-width: 0; }
+  .record-main { font-weight: 600; font-size: .95rem; }
+  .record-sub  { font-size: .78rem; color: var(--muted); margin-top: 2px; }
+  .record-meta { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
+  .record-time { font-size: .75rem; color: var(--muted); }
+  .record-actions { display: flex; gap: 6px; flex-shrink: 0; }
+
+  /* ── Chart ── */
+  .chart-wrap { width: 100%; overflow-x: auto; margin-top: 8px; }
+  canvas { display: block; }
+
+  /* ── Medication ── */
+  .med-schedule { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+  .med-pill {
+    display: flex; align-items: center; gap: 6px;
+    background: var(--bg); border: 1.5px solid var(--border);
+    border-radius: 20px; padding: 5px 12px;
+    font-size: .8rem; font-weight: 600;
+  }
+  .med-pill .dot { width: 8px; height: 8px; border-radius: 50%; }
+
+  /* ── Empty state ── */
+  .empty { text-align: center; padding: 40px 20px; color: var(--muted); }
+  .empty .emoji { font-size: 2.5rem; }
+  .empty p { margin-top: 8px; font-size: .9rem; }
+
+  /* ── Chip colors for meds ── */
+  .c0 { background: #dbeafe; color: #1d4ed8; border-color: #bfdbfe; }
+  .c1 { background: #dcfce7; color: #166534; border-color: #bbf7d0; }
+  .c2 { background: #fae8ff; color: #86198f; border-color: #f5d0fe; }
+  .c3 { background: #ffedd5; color: #9a3412; border-color: #fed7aa; }
+  .c4 { background: #e0f2fe; color: #075985; border-color: #bae6fd; }
+
+  /* ── Filter bar ── */
+  .filter-bar { display: flex; gap: 8px; margin-top: 16px; overflow-x: auto; padding-bottom: 4px; }
+  .filter-btn {
+    flex-shrink: 0; padding: 6px 14px;
+    border: 1.5px solid var(--border); border-radius: 20px;
+    font-size: .8rem; font-weight: 600;
+    background: var(--card); color: var(--muted); cursor: pointer;
+  }
+  .filter-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+  /* ── Arm panels ── */
+  .arm-panels { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+  .arm-panel { border: 1.5px solid var(--border); border-radius: var(--radius); padding: 12px; background: var(--bg); }
+  .arm-panel-title { font-size: .82rem; font-weight: 700; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .arm-panel-title .arm-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .arm-left  .arm-dot { background: #ef4444; }
+  .arm-right .arm-dot { background: #3b82f6; }
+  .arm-left  { border-color: #fecaca; }
+  .arm-right { border-color: #bfdbfe; }
+  .arm-left:focus-within  { border-color: #ef4444; background: #fff5f5; }
+  .arm-right:focus-within { border-color: #3b82f6; background: #eff6ff; }
+  .arm-field { display: flex; flex-direction: column; gap: 3px; margin-bottom: 8px; }
+  .arm-field:last-child { margin-bottom: 0; }
+  .arm-field label { font-size: .72rem; font-weight: 600; color: var(--muted); }
+  .arm-field input {
+    border: 1.5px solid var(--border); border-radius: 8px;
+    padding: 8px 10px; font-size: .9rem; width: 100%;
+    outline: none; background: white; transition: border-color .2s;
+  }
+
+  /* ── Chart arm toggle ── */
+  .chart-toggle { display: flex; gap: 6px; margin-bottom: 8px; }
+  .chart-toggle-btn {
+    padding: 4px 12px; border-radius: 20px;
+    border: 1.5px solid var(--border); background: var(--bg);
+    font-size: .78rem; font-weight: 600; color: var(--muted); cursor: pointer;
+  }
+  .chart-toggle-btn.active-left  { background: #fee2e2; color: #b91c1c; border-color: #fca5a5; }
+  .chart-toggle-btn.active-right { background: #dbeafe; color: #1d4ed8; border-color: #93c5fd; }
+
+  /* ── Diff badge ── */
+  .diff-badge {
+    display: inline-block; padding: 1px 8px; border-radius: 20px;
+    font-size: .7rem; font-weight: 700; background: #fef9c3; color: #854d0e;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>💊 健康管家</h1>
+  <p id="header-date"></p>
+</header>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('dashboard')">📊 總覽</button>
+  <button class="tab-btn" onclick="switchTab('bp')">❤️ 血壓</button>
+  <button class="tab-btn" onclick="switchTab('med')">💊 用藥</button>
+  <button class="tab-btn" onclick="switchTab('history')">📋 紀錄</button>
+</div>
+
+<main>
+
+  <!-- ══════════ DASHBOARD ══════════ -->
+  <div id="panel-dashboard" class="tab-panel active">
+    <div class="summary-row">
+      <div class="summary-card">
+        <div class="val" id="dash-bp-count">0</div>
+        <div class="lbl">血壓紀錄</div>
+      </div>
+      <div class="summary-card">
+        <div class="val" id="dash-med-count">0</div>
+        <div class="lbl">服藥次數</div>
+      </div>
+      <div class="summary-card">
+        <div class="val" id="dash-streak">0</div>
+        <div class="lbl">連續天數</div>
+      </div>
+    </div>
+
+    <div class="card" id="dash-bp-card">
+      <div class="card-title">❤️ 最新血壓</div>
+      <div id="dash-bp-latest">
+        <div class="empty"><div class="emoji">📏</div><p>尚無血壓紀錄</p></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📈 血壓趨勢（近 14 筆）</div>
+      <div class="chart-toggle">
+        <button class="chart-toggle-btn active-left" id="chart-btn-left" onclick="setChartArm('left')">🔴 左手</button>
+        <button class="chart-toggle-btn" id="chart-btn-right" onclick="setChartArm('right')">🔵 右手</button>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="bp-chart" height="180"></canvas>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">💊 今日用藥</div>
+      <div id="dash-today-meds">
+        <div class="empty"><div class="emoji">✅</div><p>今日尚無服藥紀錄</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ BLOOD PRESSURE ══════════ -->
+  <div id="panel-bp" class="tab-panel">
+    <div class="card">
+      <div class="card-title">➕ 新增血壓量測</div>
+      <p style="font-size:.8rem;color:var(--muted);margin-bottom:12px;">左手、右手可同時填寫，至少填一側即可儲存。</p>
+
+      <div class="arm-panels">
+        <div class="arm-panel arm-left">
+          <div class="arm-panel-title"><span class="arm-dot"></span> 左手</div>
+          <div class="arm-field"><label>收縮壓 (mmHg)</label><input type="number" id="bp-l-sys" placeholder="120" min="60" max="250"></div>
+          <div class="arm-field"><label>舒張壓 (mmHg)</label><input type="number" id="bp-l-dia" placeholder="80" min="40" max="150"></div>
+          <div class="arm-field"><label>脈搏 (bpm)</label><input type="number" id="bp-l-pulse" placeholder="72" min="30" max="200"></div>
+        </div>
+        <div class="arm-panel arm-right">
+          <div class="arm-panel-title"><span class="arm-dot"></span> 右手</div>
+          <div class="arm-field"><label>收縮壓 (mmHg)</label><input type="number" id="bp-r-sys" placeholder="120" min="60" max="250"></div>
+          <div class="arm-field"><label>舒張壓 (mmHg)</label><input type="number" id="bp-r-dia" placeholder="80" min="40" max="150"></div>
+          <div class="arm-field"><label>脈搏 (bpm)</label><input type="number" id="bp-r-pulse" placeholder="72" min="30" max="200"></div>
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label>量測時間</label>
+          <input type="datetime-local" id="bp-time">
+        </div>
+        <div class="form-group">
+          <label>姿勢</label>
+          <select id="bp-posture">
+            <option value="坐姿">坐姿</option>
+            <option value="臥姿">臥姿</option>
+            <option value="站姿">站姿</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label>備註</label>
+          <textarea id="bp-note" placeholder="例：飯後量測、感覺頭暈..."></textarea>
+        </div>
+      </div>
+      <button class="btn btn-primary btn-full" onclick="saveBP()">💾 儲存血壓</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📖 血壓分類參考</div>
+      <table style="width:100%;border-collapse:collapse;font-size:.82rem;">
+        <thead>
+          <tr style="background:var(--bg);">
+            <th style="padding:8px;text-align:left;">分類</th>
+            <th style="padding:8px;text-align:center;">收縮壓</th>
+            <th style="padding:8px;text-align:center;">舒張壓</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;"><span class="bp-badge bp-normal">正常</span></td><td style="text-align:center;">&lt; 120</td><td style="text-align:center;">&lt; 80</td></tr>
+          <tr style="background:var(--bg);"><td style="padding:6px 8px;"><span class="bp-badge bp-elevated">偏高前期</span></td><td style="text-align:center;">120–129</td><td style="text-align:center;">&lt; 80</td></tr>
+          <tr><td style="padding:6px 8px;"><span class="bp-badge bp-high1">高血壓第一期</span></td><td style="text-align:center;">130–139</td><td style="text-align:center;">80–89</td></tr>
+          <tr style="background:var(--bg);"><td style="padding:6px 8px;"><span class="bp-badge bp-high2">高血壓第二期</span></td><td style="text-align:center;">≥ 140</td><td style="text-align:center;">≥ 90</td></tr>
+          <tr><td style="padding:6px 8px;"><span class="bp-badge bp-crisis">高血壓危機</span></td><td style="text-align:center;">≥ 180</td><td style="text-align:center;">≥ 120</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══════════ MEDICATION ══════════ -->
+  <div id="panel-med" class="tab-panel">
+    <div class="card">
+      <div class="card-title">✅ 紀錄服藥</div>
+      <div class="form-grid">
+        <div class="form-group full">
+          <label>藥品名稱 *</label>
+          <input type="text" id="med-name" list="med-list" placeholder="例：氨氯地平 Amlodipine">
+          <datalist id="med-list"></datalist>
+        </div>
+        <div class="form-group"><label>劑量</label><input type="text" id="med-dose" placeholder="例：5mg"></div>
+        <div class="form-group"><label>數量</label><input type="number" id="med-qty" placeholder="1" min="0.5" step="0.5" value="1"></div>
+        <div class="form-group"><label>服藥時間</label><input type="datetime-local" id="med-time"></div>
+        <div class="form-group">
+          <label>時段</label>
+          <select id="med-period">
+            <option value="早餐前">早餐前</option>
+            <option value="早餐後" selected>早餐後</option>
+            <option value="午餐前">午餐前</option>
+            <option value="午餐後">午餐後</option>
+            <option value="晚餐前">晚餐前</option>
+            <option value="晚餐後">晚餐後</option>
+            <option value="睡前">睡前</option>
+            <option value="其他">其他</option>
+          </select>
+        </div>
+        <div class="form-group full"><label>備註</label><textarea id="med-note" placeholder="例：忘記吃早班、改吃半顆..."></textarea></div>
+      </div>
+      <button class="btn btn-primary btn-full" onclick="saveMed()">💾 儲存服藥</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🗂️ 我的藥品清單</div>
+      <div id="med-manage-list">
+        <div class="empty"><div class="emoji">💊</div><p>尚未新增藥品</p></div>
+      </div>
+      <hr style="margin:14px 0;border-color:var(--border);">
+      <div class="card-title" style="margin-bottom:10px;">➕ 新增藥品</div>
+      <div class="form-grid">
+        <div class="form-group full"><label>藥品名稱 *</label><input type="text" id="new-med-name" placeholder="藥品名稱"></div>
+        <div class="form-group"><label>預設劑量</label><input type="text" id="new-med-dose" placeholder="5mg"></div>
+        <div class="form-group">
+          <label>顏色標記</label>
+          <select id="new-med-color">
+            <option value="c0">藍色</option>
+            <option value="c1">綠色</option>
+            <option value="c2">紫色</option>
+            <option value="c3">橙色</option>
+            <option value="c4">天藍</option>
+          </select>
+        </div>
+        <div class="form-group full"><label>服藥頻率</label><input type="text" id="new-med-freq" placeholder="例：每日 2 次、飯後"></div>
+      </div>
+      <button class="btn btn-primary btn-full" onclick="addMedToList()">新增藥品</button>
+    </div>
+  </div>
+
+  <!-- ══════════ HISTORY ══════════ -->
+  <div id="panel-history" class="tab-panel">
+    <div class="filter-bar">
+      <button class="filter-btn active" onclick="setFilter('all', this)">全部</button>
+      <button class="filter-btn" onclick="setFilter('bp', this)">血壓</button>
+      <button class="filter-btn" onclick="setFilter('med', this)">用藥</button>
+      <button class="filter-btn" onclick="setFilter('today', this)">今日</button>
+      <button class="filter-btn" onclick="setFilter('week', this)">本週</button>
+    </div>
+    <div class="card" style="margin-top:12px;">
+      <div id="history-list">
+        <div class="empty"><div class="emoji">📋</div><p>尚無任何紀錄</p></div>
+      </div>
+    </div>
+    <button class="btn btn-danger btn-full" style="margin-top:12px;" onclick="confirmClearAll()">🗑️ 清除所有資料</button>
+  </div>
+
+</main>
+
+<script>
+let records    = JSON.parse(localStorage.getItem('ht_records') || '[]');
+let medList    = JSON.parse(localStorage.getItem('ht_medlist') || '[]');
+let histFilter = 'all';
+let chartArm   = 'left';
+
+function save() {
+  localStorage.setItem('ht_records', JSON.stringify(records));
+  localStorage.setItem('ht_medlist', JSON.stringify(medList));
+}
+
+function nowLocal() { return new Date().toISOString().slice(0, 16); }
+
+function fmtDatetime(iso) {
+  const d = new Date(iso), pad = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}/${pad(d.getMonth()+1)}/${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+function isToday(iso) {
+  const d = new Date(iso), t = new Date();
+  return d.getFullYear()===t.getFullYear() && d.getMonth()===t.getMonth() && d.getDate()===t.getDate();
+}
+
+function isThisWeek(iso) {
+  const d = new Date(iso), now = new Date();
+  const start = new Date(now); start.setDate(now.getDate() - now.getDay()); start.setHours(0,0,0,0);
+  return d >= start;
+}
+
+function bpStatus(sys, dia) {
+  if (sys >= 180 || dia >= 120) return { label: '高血壓危機',   cls: 'bp-crisis'   };
+  if (sys >= 140 || dia >= 90)  return { label: '高血壓第二期', cls: 'bp-high2'    };
+  if (sys >= 130 || dia >= 80)  return { label: '高血壓第一期', cls: 'bp-high1'    };
+  if (sys >= 120 && dia < 80)   return { label: '偏高前期',     cls: 'bp-elevated' };
+  return { label: '正常', cls: 'bp-normal' };
+}
+
+function armData(r, side) {
+  if (r.left || r.right) return r[side] || null;
+  if ((side === 'left' && r.arm === '左臂') || (side === 'right' && r.arm === '右臂'))
+    return { sys: r.sys, dia: r.dia, pulse: r.pulse };
+  return null;
+}
+
+function switchTab(name) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  event.currentTarget.classList.add('active');
+  if (name === 'dashboard') renderDashboard();
+  if (name === 'history')   renderHistory();
+  if (name === 'med')       renderMedManage();
+}
+
+function saveBP() {
+  const g = id => document.getElementById(id);
+  const lSys=parseInt(g('bp-l-sys').value)||0, lDia=parseInt(g('bp-l-dia').value)||0, lPulse=parseInt(g('bp-l-pulse').value)||null;
+  const rSys=parseInt(g('bp-r-sys').value)||0, rDia=parseInt(g('bp-r-dia').value)||0, rPulse=parseInt(g('bp-r-pulse').value)||null;
+  const hasLeft=lSys>=60&&lDia>=40, hasRight=rSys>=60&&rDia>=40;
+  if (!hasLeft && !hasRight) { alert('請至少填寫一側（左手或右手）的收縮壓與舒張壓！'); return; }
+  records.unshift({
+    id: Date.now(), type: 'bp',
+    left:  hasLeft  ? {sys:lSys,dia:lDia,pulse:lPulse} : null,
+    right: hasRight ? {sys:rSys,dia:rDia,pulse:rPulse} : null,
+    posture: g('bp-posture').value,
+    note: g('bp-note').value.trim(),
+    time: g('bp-time').value || nowLocal()
+  });
+  save();
+  ['bp-l-sys','bp-l-dia','bp-l-pulse','bp-r-sys','bp-r-dia','bp-r-pulse','bp-note'].forEach(id=>g(id).value='');
+  g('bp-time').value = '';
+  alert('✅ 血壓已儲存！');
+  renderDashboard();
+}
+
+function saveMed() {
+  const name = document.getElementById('med-name').value.trim();
+  if (!name) { alert('請輸入藥品名稱！'); return; }
+  records.unshift({
+    id: Date.now(), type: 'med', name,
+    dose: document.getElementById('med-dose').value.trim(),
+    qty: parseFloat(document.getElementById('med-qty').value)||1,
+    period: document.getElementById('med-period').value,
+    note: document.getElementById('med-note').value.trim(),
+    time: document.getElementById('med-time').value || nowLocal()
+  });
+  save();
+  ['med-name','med-dose','med-note'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('med-qty').value='1';
+  document.getElementById('med-time').value='';
+  alert('✅ 服藥已記錄！');
+  renderDashboard();
+}
+
+function addMedToList() {
+  const name = document.getElementById('new-med-name').value.trim();
+  if (!name) { alert('請輸入藥品名稱！'); return; }
+  if (medList.find(m=>m.name===name)) { alert('藥品已存在！'); return; }
+  medList.push({ id:Date.now(), name,
+    dose: document.getElementById('new-med-dose').value.trim(),
+    color: document.getElementById('new-med-color').value,
+    freq: document.getElementById('new-med-freq').value.trim()
+  });
+  save();
+  ['new-med-name','new-med-dose','new-med-freq'].forEach(id=>document.getElementById(id).value='');
+  renderMedManage(); updateMedDatalist();
+}
+
+function deleteMedFromList(id) {
+  if (!confirm('確定刪除此藥品？')) return;
+  medList=medList.filter(m=>m.id!==id); save(); renderMedManage(); updateMedDatalist();
+}
+
+function renderMedManage() {
+  const el=document.getElementById('med-manage-list');
+  if (!medList.length) { el.innerHTML='<div class="empty"><div class="emoji">💊</div><p>尚未新增藥品</p></div>'; return; }
+  el.innerHTML='<div class="med-schedule">'+medList.map(m=>`
+    <div class="med-pill ${m.color}">
+      <span class="dot" style="background:currentColor;"></span>
+      <span>${m.name}${m.dose?' · '+m.dose:''}${m.freq?' ('+m.freq+')':''}</span>
+      <button onclick="deleteMedFromList(${m.id})" style="border:none;background:none;cursor:pointer;font-size:1rem;color:inherit;padding:0 2px;">✕</button>
+    </div>`).join('')+'</div>';
+}
+
+function updateMedDatalist() {
+  document.getElementById('med-list').innerHTML=medList.map(m=>`<option value="${m.name}">`).join('');
+}
+
+function deleteRecord(id) {
+  if (!confirm('確定刪除此筆紀錄？')) return;
+  records=records.filter(r=>r.id!==id); save(); renderHistory(); renderDashboard();
+}
+
+function setFilter(f, btn) {
+  histFilter=f;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active'); renderHistory();
+}
+
+function bpRecordHTML(r) {
+  const L=armData(r,'left'), R=armData(r,'right');
+  let armsHTML='';
+  if (L&&L.sys) { const st=bpStatus(L.sys,L.dia); armsHTML+=`<div style="margin-bottom:4px;"><span style="color:#b91c1c;font-weight:700;font-size:.78rem;">🔴 左手</span> <span style="font-weight:600;">${L.sys}/${L.dia} mmHg${L.pulse?' · '+L.pulse+' bpm':''}</span> <span class="bp-badge ${st.cls}">${st.label}</span></div>`; }
+  if (R&&R.sys) { const st=bpStatus(R.sys,R.dia); armsHTML+=`<div style="margin-bottom:4px;"><span style="color:#1d4ed8;font-weight:700;font-size:.78rem;">🔵 右手</span> <span style="font-weight:600;">${R.sys}/${R.dia} mmHg${R.pulse?' · '+R.pulse+' bpm':''}</span> <span class="bp-badge ${st.cls}">${st.label}</span></div>`; }
+  const diff=(L&&R&&L.sys&&R.sys&&Math.abs(L.sys-R.sys)>10)?`<span class="diff-badge">⚠️ 左右差 ${Math.abs(L.sys-R.sys)} mmHg</span>`:'';
+  return `<div class="record-item"><div class="record-icon icon-bp">❤️</div><div class="record-body">${armsHTML}<div class="record-sub">${r.posture||r.arm||''}${r.note?' · '+r.note:''}</div><div class="record-meta">${diff}<span class="record-time">🕐 ${fmtDatetime(r.time)}</span></div></div><div class="record-actions"><button class="btn btn-danger btn-sm" onclick="deleteRecord(${r.id})">刪除</button></div></div>`;
+}
+
+function renderHistory() {
+  let list=[...records];
+  if (histFilter==='bp')    list=list.filter(r=>r.type==='bp');
+  if (histFilter==='med')   list=list.filter(r=>r.type==='med');
+  if (histFilter==='today') list=list.filter(r=>isToday(r.time));
+  if (histFilter==='week')  list=list.filter(r=>isThisWeek(r.time));
+  const el=document.getElementById('history-list');
+  if (!list.length) { el.innerHTML='<div class="empty"><div class="emoji">📋</div><p>此條件無紀錄</p></div>'; return; }
+  el.innerHTML=list.map(r=>{
+    if (r.type==='bp') return bpRecordHTML(r);
+    const med=medList.find(m=>m.name===r.name), colorCls=med?med.color:'c0';
+    return `<div class="record-item"><div class="record-icon icon-med">💊</div><div class="record-body"><div class="record-main">${r.name}${r.dose?' '+r.dose:''} × ${r.qty}</div><div class="record-sub">${r.period}${r.note?' · '+r.note:''}</div><div class="record-meta"><span class="bp-badge ${colorCls}" style="border-radius:20px;">${r.period}</span><span class="record-time">🕐 ${fmtDatetime(r.time)}</span></div></div><div class="record-actions"><button class="btn btn-danger btn-sm" onclick="deleteRecord(${r.id})">刪除</button></div></div>`;
+  }).join('');
+}
+
+function renderDashboard() {
+  const bpRecs=records.filter(r=>r.type==='bp'), medRecs=records.filter(r=>r.type==='med');
+  document.getElementById('dash-bp-count').textContent=bpRecs.length;
+  document.getElementById('dash-med-count').textContent=medRecs.length;
+  document.getElementById('dash-streak').textContent=calcStreak();
+  const latestBP=bpRecs[0], bpEl=document.getElementById('dash-bp-latest');
+  if (latestBP) {
+    const L=armData(latestBP,'left'), R=armData(latestBP,'right');
+    const armCard=(label,color,d)=>{
+      if (!d||!d.sys) return '';
+      const st=bpStatus(d.sys,d.dia);
+      return `<div style="flex:1;text-align:center;padding:10px 6px;background:var(--bg);border-radius:10px;"><div style="font-size:.75rem;font-weight:700;color:${color};margin-bottom:4px;">${label}</div><div style="font-size:1.6rem;font-weight:800;color:${color};">${d.sys}<span style="font-size:.85rem;color:var(--muted);">/${d.dia}</span></div><div style="font-size:.7rem;color:var(--muted);">mmHg</div>${d.pulse?`<div style="font-size:.8rem;margin-top:2px;">💓 ${d.pulse} bpm</div>`:''}<div style="margin-top:5px;"><span class="bp-badge ${st.cls}">${st.label}</span></div></div>`;
+    };
+    const diff=(L&&R&&L.sys&&R.sys&&Math.abs(L.sys-R.sys)>10)?`<div style="text-align:center;margin-top:6px;"><span class="diff-badge">⚠️ 左右收縮壓差 ${Math.abs(L.sys-R.sys)} mmHg，建議諮詢醫師</span></div>`:'';
+    bpEl.innerHTML=`<div style="display:flex;gap:10px;margin-bottom:6px;">${armCard('🔴 左手','#b91c1c',L)}${armCard('🔵 右手','#1d4ed8',R)}</div>${diff}<div style="text-align:right;font-size:.75rem;color:var(--muted);margin-top:6px;">🕐 ${fmtDatetime(latestBP.time)} · ${latestBP.posture||latestBP.arm||''}</div>`;
+  } else {
+    bpEl.innerHTML='<div class="empty"><div class="emoji">📏</div><p>尚無血壓紀錄</p></div>';
+  }
+  const todayMeds=medRecs.filter(r=>isToday(r.time)), todayEl=document.getElementById('dash-today-meds');
+  if (todayMeds.length) {
+    todayEl.innerHTML=todayMeds.map(r=>{
+      const med=medList.find(m=>m.name===r.name), colorCls=med?med.color:'c0';
+      return `<div class="record-item"><div class="record-icon icon-med">💊</div><div class="record-body"><div class="record-main">${r.name}${r.dose?' '+r.dose:''} × ${r.qty}</div><div class="record-meta"><span class="bp-badge ${colorCls}">${r.period}</span><span class="record-time">🕐 ${fmtDatetime(r.time)}</span></div></div></div>`;
+    }).join('');
+  } else { todayEl.innerHTML='<div class="empty"><div class="emoji">✅</div><p>今日尚無服藥紀錄</p></div>'; }
+  refreshChart(bpRecs);
+}
+
+function setChartArm(arm) {
+  chartArm=arm;
+  document.getElementById('chart-btn-left').className='chart-toggle-btn'+(arm==='left'?' active-left':'');
+  document.getElementById('chart-btn-right').className='chart-toggle-btn'+(arm==='right'?' active-right':'');
+  refreshChart(records.filter(r=>r.type==='bp'));
+}
+
+function refreshChart(bpRecs) {
+  const data=bpRecs.slice(0,14).reverse().map(r=>{
+    const d=armData(r,chartArm)||armData(r,chartArm==='left'?'right':'left');
+    return d&&d.sys?{sys:d.sys,dia:d.dia,time:r.time}:null;
+  }).filter(Boolean);
+  drawBPChart(data,chartArm);
+}
+
+function calcStreak() {
+  const days=new Set(records.map(r=>r.time.slice(0,10)));
+  let streak=0, d=new Date();
+  while (days.has(d.toISOString().slice(0,10))) { streak++; d.setDate(d.getDate()-1); }
+  return streak;
+}
+
+function drawBPChart(data, arm) {
+  const canvas=document.getElementById('bp-chart');
+  const W=Math.max(canvas.parentElement.clientWidth,300);
+  canvas.width=W; canvas.height=180;
+  const ctx=canvas.getContext('2d');
+  ctx.clearRect(0,0,W,180);
+  const sysColor=arm==='right'?'#3b82f6':'#ef4444';
+  const diaColor=arm==='right'?'#93c5fd':'#fca5a5';
+  if (!data.length) { ctx.fillStyle='#94a3b8'; ctx.font='14px sans-serif'; ctx.textAlign='center'; ctx.fillText('此手臂尚無資料',W/2,90); return; }
+  const PAD={t:20,b:30,l:36,r:10}, CW=W-PAD.l-PAD.r, CH=180-PAD.t-PAD.b;
+  const vals=data.flatMap(d=>[d.sys,d.dia]);
+  const minV=Math.max(0,Math.min(...vals)-10), maxV=Math.min(250,Math.max(...vals)+10);
+  const sy=v=>PAD.t+CH-(v-minV)/(maxV-minV)*CH;
+  const sx=i=>PAD.l+(data.length===1?CW/2:i/(data.length-1)*CW);
+  ctx.strokeStyle='#e2e8f0'; ctx.lineWidth=1;
+  [80,90,120,130,140].forEach(v=>{ if(v<minV||v>maxV)return; ctx.beginPath(); ctx.moveTo(PAD.l,sy(v)); ctx.lineTo(PAD.l+CW,sy(v)); ctx.stroke(); ctx.fillStyle='#94a3b8'; ctx.font='10px sans-serif'; ctx.textAlign='right'; ctx.fillText(v,PAD.l-4,sy(v)+3); });
+  const drawLine=(color,getter)=>{ ctx.strokeStyle=color; ctx.lineWidth=2.5; ctx.beginPath(); data.forEach((d,i)=>i===0?ctx.moveTo(sx(i),sy(getter(d))):ctx.lineTo(sx(i),sy(getter(d)))); ctx.stroke(); data.forEach((d,i)=>{ ctx.fillStyle=color; ctx.beginPath(); ctx.arc(sx(i),sy(getter(d)),4,0,Math.PI*2); ctx.fill(); }); };
+  drawLine(sysColor,d=>d.sys); drawLine(diaColor,d=>d.dia);
+  ctx.fillStyle='#94a3b8'; ctx.font='9px sans-serif'; ctx.textAlign='center';
+  data.forEach((d,i)=>{ if(i%2===0||data.length<=5) ctx.fillText(d.time.slice(5,10),sx(i),180-6); });
+  const armLabel=arm==='left'?'左手':'右手';
+  ctx.fillStyle=sysColor; ctx.fillRect(PAD.l,PAD.t-12,14,4);
+  ctx.fillStyle='#1e293b'; ctx.font='10px sans-serif'; ctx.textAlign='left'; ctx.fillText(`收縮壓(${armLabel})`,PAD.l+18,PAD.t-8);
+  ctx.fillStyle=diaColor; ctx.fillRect(PAD.l+110,PAD.t-12,14,4);
+  ctx.fillStyle='#1e293b'; ctx.fillText(`舒張壓(${armLabel})`,PAD.l+128,PAD.t-8);
+}
+
+function confirmClearAll() {
+  if (prompt('此操作將刪除所有資料且無法復原！\n請輸入「確認刪除」繼續：')==='確認刪除') {
+    records=[]; medList=[]; save(); renderDashboard(); renderHistory(); renderMedManage(); alert('已清除所有資料。');
+  }
+}
+
+(function init() {
+  const now=nowLocal();
+  document.getElementById('bp-time').value=now;
+  document.getElementById('med-time').value=now;
+  const d=new Date(), days=['日','一','二','三','四','五','六'];
+  document.getElementById('header-date').textContent=`${d.getFullYear()} 年 ${d.getMonth()+1} 月 ${d.getDate()} 日（星期${days[d.getDay()]}）`;
+  updateMedDatalist(); renderDashboard(); renderMedManage();
+  window.addEventListener('resize',()=>{ if(document.getElementById('panel-dashboard').classList.contains('active')) refreshChart(records.filter(r=>r.type==='bp')); });
+})();
+</script>
+</body>
+</html>

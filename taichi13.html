@@ -1,0 +1,411 @@
+<title>十三式太極拳</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<style>
+/* Layout: one column for phones — form title, front/back stage side by side, cue + footprint map, chips; controls pinned to the bottom. */
+:root{
+  --paper:#eaefeb; --panel:#f6f8f5; --ink:#1c2827; --muted:#5a6966; --line:#cbd6d1;
+  --left:#17807a; --right:#c4542c; --accent:#17807a;
+  --torso:#fbfcfa; --torso-edge:#2f3d3b; --skin:#e7c6a4; --hair:#1f2629; --ground:#d5ddd8;
+  --f-display:"Noto Serif TC","Songti TC","PMingLiU",serif;
+  --f-body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#111816; --panel:#18211f; --ink:#e3ebe7; --muted:#97a6a1; --line:#2b3633;
+  --left:#4cbab1; --right:#ee865a; --accent:#4cbab1;
+  --torso:#dfe6e2; --torso-edge:#0a0e0d; --skin:#d4ad8b; --hair:#0b0e0f; --ground:#222c29; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#111816; --panel:#18211f; --ink:#e3ebe7; --muted:#97a6a1; --line:#2b3633;
+  --left:#4cbab1; --right:#ee865a; --accent:#4cbab1;
+  --torso:#dfe6e2; --torso-edge:#0a0e0d; --skin:#d4ad8b; --hair:#0b0e0f; --ground:#222c29; color-scheme:dark}
+*{box-sizing:border-box}
+html,body{background:var(--paper);color:var(--ink)}
+body{margin:0;font-family:var(--f-body);font-size:15px;line-height:1.6;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:12px 120px}
+.wrap{max-width:900px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+header{display:flex;align-items:baseline;justify-content:space-between;gap:8px;flex-wrap:wrap}
+header h1{font-family:var(--f-display);font-size:1.25rem;margin:0;letter-spacing:.08em}
+header small{color:var(--muted);font-size:.8rem}
+.now{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.now .num{font-family:var(--f-display);font-size:.95rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.now h2{font-family:var(--f-display);font-size:clamp(1.8rem,7vw,2.6rem);margin:0;letter-spacing:.12em;line-height:1.2}
+.now .en{color:var(--muted);font-size:.85rem;letter-spacing:.04em}
+.stage{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.view{margin:0;background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden;position:relative}
+.view canvas{display:block;width:100%;aspect-ratio:3/4;max-width:100%}
+.view figcaption{position:absolute;left:8px;top:6px;font-size:.75rem;color:var(--muted);letter-spacing:.06em}
+.view figcaption b{color:var(--ink);font-weight:700}
+.cuebox{display:grid;grid-template-columns:1fr 132px;gap:10px;align-items:stretch}
+.cuetext{min-width:0;display:flex;flex-direction:column;gap:6px}
+.step{font-size:.78rem;color:var(--muted);font-variant-numeric:tabular-nums}
+#cue{margin:0;font-size:1.08rem;line-height:1.55;font-weight:500;min-height:3.2em}
+.breath{display:inline-flex;align-items:center;gap:6px;font-size:.8rem;color:var(--muted)}
+.breath span{display:inline-block;min-width:2.6em;text-align:center;padding:1px 8px;border-radius:99px;border:1px solid var(--line);color:var(--ink);font-weight:700}
+.breath span.in{border-color:var(--left);color:var(--left)}
+.breath span.out{border-color:var(--right);color:var(--right)}
+.map{background:var(--panel);border:1px solid var(--line);border-radius:10px;position:relative;overflow:hidden}
+.map canvas{display:block;width:100%;height:100%;min-height:140px}
+.map span{position:absolute;left:6px;top:4px;font-size:.68rem;color:var(--muted)}
+.scrub{width:100%;accent-color:var(--accent)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips button{font:inherit;font-size:.85rem;padding:4px 10px;border-radius:99px;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer}
+.chips button[aria-current="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:.82rem;color:var(--muted)}
+.legend i{display:inline-block;width:18px;height:6px;border-radius:3px;vertical-align:middle;margin-right:6px}
+details{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 14px}
+details summary{cursor:pointer;font-weight:700}
+details p,details li{color:var(--muted);font-size:.88rem;max-width:65ch}
+details a{color:var(--accent)}
+.controls{position:fixed;left:0;right:0;bottom:0;z-index:5;background:var(--panel);border-top:1px solid var(--line);
+  padding-top:10px;padding-bottom:calc(10px + env(safe-area-inset-bottom,0px));
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.controls .row{max-width:900px;margin:0 auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:space-between}
+.btns{display:flex;gap:8px}
+.controls button.big{font:inherit;font-size:1rem;font-weight:700;min-width:52px;height:48px;padding:0 14px;border-radius:12px;border:1px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer}
+.controls button.play{background:var(--ink);color:var(--paper);border-color:var(--ink);min-width:88px}
+.opts{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:.85rem}
+.opts select{font:inherit;padding:4px 6px;border-radius:8px;border:1px solid var(--line);background:var(--paper);color:var(--ink)}
+.opts label{display:inline-flex;align-items:center;gap:4px;cursor:pointer}
+button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media (max-width:420px){.cuebox{grid-template-columns:1fr 104px}#cue{font-size:1rem}}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>十三式太極拳</h1>
+    <small>正面・背面同步教學動畫</small>
+  </header>
+
+  <section class="now" aria-live="polite">
+    <span class="num" id="formNum">第 1 式／共 13 式</span>
+    <h2 id="formName">起勢</h2>
+    <span class="en" id="formEn">Commencing</span>
+  </section>
+
+  <section class="stage">
+    <figure class="view"><canvas id="cvFront" aria-label="正面視角動畫"></canvas><figcaption><b>正面</b>・老師面對你</figcaption></figure>
+    <figure class="view"><canvas id="cvBack" aria-label="背面視角動畫"></canvas><figcaption><b>背面</b>・跟著一起做</figcaption></figure>
+  </section>
+
+  <section class="cuebox">
+    <div class="cuetext">
+      <div class="step" id="step">步驟 1／4</div>
+      <p id="cue">併步站立，全身放鬆</p>
+      <div class="breath">呼吸 <span id="breath">自然</span></div>
+    </div>
+    <div class="map"><canvas id="cvMap" aria-label="腳步俯視圖"></canvas><span>腳步俯視 ↑前</span></div>
+  </section>
+
+  <input class="scrub" id="scrub" type="range" min="0" max="1000" value="0" step="1" aria-label="播放進度">
+
+  <nav class="chips" id="chips" aria-label="選擇招式"></nav>
+
+  <div class="legend">
+    <span><i style="background:var(--left)"></i>左手・左腳</span>
+    <span><i style="background:var(--right)"></i>右手・右腳</span>
+    <span>背面視角的左右和你自己一樣，最適合跟著練</span>
+  </div>
+
+  <details>
+    <summary>這套十三式的編排與練習提醒</summary>
+    <p>「十三式」在不同流派有不同內容（例如武當十三勢、八法五步、各地社團的精簡套路）。這裡採用最普及的簡化二十四式太極拳中選出的 13 個代表動作，依原套路順序串成一套：</p>
+    <ol id="formList"></ol>
+    <p>動畫是依動作要領編排的示意，不是逐格複製某支影片。若你的老師教的是別的版本，把招式名單給我，我可以改成那一套。</p>
+    <p>練習提醒：膝蓋不超過腳尖、動作慢而勻、呼吸自然；有高血壓或關節問題請量力而為。</p>
+  </details>
+</div>
+
+<div class="controls">
+  <div class="row">
+    <div class="btns">
+      <button class="big" id="prev" aria-label="上一式">◀</button>
+      <button class="big play" id="play">▶ 播放</button>
+      <button class="big" id="next" aria-label="下一式">▶</button>
+    </div>
+    <div class="opts">
+      <label for="speed">速度</label>
+      <select id="speed"><option value="0.5">0.5×</option><option value="0.75">0.75×</option><option value="1" selected>1×</option><option value="1.5">1.5×</option></select>
+      <label><input type="checkbox" id="loop"> 重複這一式</label>
+      <label><input type="checkbox" id="voice"> 語音口令</label>
+    </div>
+  </div>
+</div>
+
+<script>
+(()=>{
+const DEG=Math.PI/180;
+/* 座標：公尺。x+ = 人物的左手邊，z+ = 人物起始面對的方向（正面相機），y 向上。yaw 正值 = 向左轉。 */
+const FORMS=[
+{n:'起勢',en:'Commencing',q:'太極 起勢',anchor:null,k:[
+ {d:1.4,t:'併步站立，兩臂自然下垂，全身放鬆，目視前方',b:'自然',hip:[-0.11,0.95,0],lf:[-0.05,0,0],rf:[-0.17,0,0],lfy:0,rfy:0,cy:0,lh:[0.09,0.78,0.03],rh:[-0.31,0.78,0.03]},
+ {d:1.6,t:'重心移到右腳，左腳輕輕提起向左開步，與肩同寬',b:'自然',hip:[-0.14,0.94,0],lf:[0.17,0,0]},
+ {d:2.6,t:'重心回到中間，兩臂慢慢向前平舉，與肩同高',b:'吸',hip:[0,0.94,0],lh:[0.18,1.36,0.5],rh:[-0.18,1.36,0.5]},
+ {d:2.6,t:'屈膝鬆胯，兩掌輕輕下按至腹前',b:'呼',hip:[0,0.85,0],lh:[0.18,1.0,0.32],rh:[-0.18,1.0,0.32]}]},
+{n:'左右野馬分鬃',en:'Part the Wild Horse's Mane',q:'太極 野馬分鬃',anchor:{f:'r',at:[-0.17,0]},k:[
+ {d:2,t:'重心移至右腳，身體微右轉；右手在上、左手在下，胸前抱球；左腳收到右腳內側',b:'吸',hip:[-0.1,0.85,0],cy:-30,rh:[-0.15,1.22,0.28],lh:[-0.12,0.92,0.28],lf:[-0.03,0.03,0.04]},
+ {d:1.5,t:'左腳向左前方邁出，腳跟先著地',b:'—',lf:[0.2,0,0.42],lfy:15,cy:-10},
+ {d:2.5,t:'重心前移成左弓步；左手向前上分至眼高，右手下按於右胯旁',b:'呼',hip:[0.1,0.84,0.24],cy:25,lh:[0.32,1.32,0.62],rh:[-0.3,0.82,0.12],rfy:-40},
+ {d:1.3,t:'重心稍後移，左腳尖外撇',b:'吸',hip:[0.04,0.85,0.16],lfy:45},
+ {d:2,t:'重心移到左腳；左手在上、右手在下抱球；右腳收到左腳內側',b:'吸',hip:[0.18,0.85,0.4],cy:30,lh:[0.18,1.22,0.68],rh:[0.15,0.92,0.68],rf:[0.08,0.03,0.42],rfy:0},
+ {d:1.5,t:'右腳向右前方邁出，腳跟先著地',b:'—',rf:[-0.15,0,0.85],rfy:-15,cy:10},
+ {d:2.5,t:'重心前移成右弓步；右手分至眼高，左手按於左胯旁',b:'呼',hip:[-0.06,0.84,0.66],cy:-25,rh:[-0.22,1.32,1.04],lh:[0.28,0.82,0.54],lfy:40},
+ {d:1.3,t:'重心稍後移，右腳尖外撇',b:'吸',hip:[0,0.85,0.58],rfy:-45},
+ {d:2,t:'重心移到右腳；右手在上抱球；左腳收到右腳內側',b:'吸',hip:[-0.12,0.85,0.82],cy:-30,rh:[-0.12,1.22,1.1],lh:[-0.09,0.92,1.1],lf:[-0.04,0.03,0.85],lfy:0},
+ {d:1.5,t:'左腳向左前方邁出',b:'—',lf:[0.18,0,1.27],lfy:15,cy:-10},
+ {d:2.5,t:'左弓步；左手分至眼高，右手按於右胯旁',b:'呼',hip:[0.08,0.84,1.08],cy:25,lh:[0.3,1.32,1.46],rh:[-0.32,0.82,0.95],rfy:-40}]},
+{n:'白鶴亮翅',en:'White Crane Spreads Its Wings',q:'太極 白鶴亮翅',anchor:{f:'l',at:[0.12,0.25]},k:[
+ {d:1.6,t:'右腳跟進半步；左手翻掌向下、右手翻掌向上，胸前抱球',b:'吸',rf:[-0.12,0,-0.12],rfy:-30,hip:[0.03,0.86,0.04],cy:15,lh:[0.1,1.2,0.38],rh:[0.06,0.95,0.36]},
+ {d:1.8,t:'重心後坐到右腳，身體右轉，右手向右上方提起',b:'吸',hip:[-0.08,0.84,-0.08],cy:-25,rh:[-0.22,1.38,0.25],lh:[-0.02,1.0,0.3]},
+ {d:2.5,t:'左腳稍前移，腳尖點地成虛步；右手提至右額前，左手按於左胯旁',b:'呼',lf:[0.12,0.02,0.25],lfy:0,cy:0,rh:[-0.24,1.62,0.2],lh:[0.26,0.82,0.12]}]},
+{n:'左摟膝拗步',en:'Brush Knee and Push',q:'太極 摟膝拗步',anchor:{f:'r',at:[-0.12,-0.12]},k:[
+ {d:2,t:'右手由前向下、向後畫弧，身體右轉；左手擺到右胸前；左腳收回',b:'吸',cy:-35,rh:[-0.38,1.12,-0.12],lh:[-0.06,1.18,0.28],lf:[0.06,0.03,0.04]},
+ {d:1.5,t:'左腳向前邁出，腳跟著地；右手屈肘收到耳旁',b:'—',lf:[0.15,0,0.45],rh:[-0.24,1.42,0.02],lh:[0,1.02,0.28],cy:-15},
+ {d:2.5,t:'重心前移成左弓步；左手由膝前摟過，按於左胯旁；右手向前推出',b:'呼',hip:[0.06,0.84,0.25],cy:5,lh:[0.28,0.82,0.32],rh:[-0.03,1.28,0.7],rfy:-40}]},
+{n:'手揮琵琶',en:'Play the Pipa',q:'太極 手揮琵琶',anchor:{f:'l',at:[0.15,0.45]},k:[
+ {d:1.3,t:'右腳跟進半步',b:'吸',rf:[-0.13,0,0.08],rfy:-30,hip:[0.02,0.86,0.2]},
+ {d:1.8,t:'重心後坐到右腳，身體稍右轉；左手由下向上挑舉',b:'吸',hip:[-0.08,0.84,0.1],cy:-15,lh:[0.16,1.24,0.45],rh:[-0.1,1.08,0.42]},
+ {d:2.5,t:'左腳稍提起，以腳跟著地成虛步；兩手如抱琵琶，左手在前與鼻同高，右手在左肘內側',b:'呼',lf:[0.12,0.03,0.4],cy:-8,lh:[0.08,1.42,0.6],rh:[0,1.1,0.36]}]},
+{n:'左右倒卷肱',en:'Repulse the Monkey',q:'太極 倒卷肱',anchor:{f:'r',at:[-0.13,0.08]},k:[
+ {d:2,t:'身體右轉，右手翻掌經腹前向後上方畫弧；左手翻掌向上前伸',b:'吸',cy:-40,rh:[-0.42,1.38,-0.18],lh:[0.12,1.3,0.58]},
+ {d:1.5,t:'左腳輕輕提起，向後退一步，前腳掌先著地；右手屈肘到耳旁',b:'—',lf:[0.15,0,-0.35],lfy:20,rh:[-0.25,1.42,0.08],cy:-15},
+ {d:2.2,t:'重心後移到左腳；右手向前推出，左手後撤收到左腰旁',b:'呼',hip:[0.07,0.84,-0.24],cy:0,rh:[-0.05,1.28,0.45],lh:[0.24,0.92,-0.08],rfy:0},
+ {d:1.8,t:'身體左轉，左手向後上方畫弧；右手翻掌向上',b:'吸',cy:40,lh:[0.42,1.38,-0.5],rh:[-0.1,1.28,0.38]},
+ {d:1.5,t:'右腳提起，向後退一步；左手屈肘到耳旁',b:'—',rf:[-0.15,0,-0.68],rfy:-20,lh:[0.25,1.42,-0.2],cy:15},
+ {d:2.2,t:'重心後移到右腳；左手向前推出，右手收到右腰旁',b:'呼',hip:[-0.07,0.84,-0.58],cy:0,lh:[0.05,1.28,0.12],rh:[-0.24,0.92,-0.42],lfy:0}]},
+{n:'左攬雀尾',en:'Grasp the Bird's Tail',q:'太極 攬雀尾',anchor:{f:'r',at:[-0.17,0]},k:[
+ {d:2,t:'身體右轉；右手在上、左手在下胸前抱球；左腳收到右腳內側',b:'吸',hip:[-0.1,0.85,0.02],cy:-30,rh:[-0.15,1.22,0.28],lh:[-0.12,0.92,0.28],lf:[-0.03,0.03,0.05],lfy:0,rfy:-20},
+ {d:1.3,t:'左腳向前邁出，腳跟著地',b:'—',lf:[0.15,0,0.45],cy:-10},
+ {d:2.3,t:'【掤】重心前移成左弓步，左臂向前掤出，與胸同高；右手按於右胯旁',b:'呼',hip:[0.06,0.84,0.25],cy:0,lh:[0.02,1.22,0.62],rh:[-0.26,0.84,0.18],rfy:-40},
+ {d:1.5,t:'左手翻掌向下前伸，右手翻掌向上靠近左腕',b:'吸',cy:15,lh:[0.06,1.3,0.78],rh:[0,1.15,0.68]},
+ {d:2.2,t:'【捋】重心後坐，身體右轉；兩手向下、向右後方捋回',b:'吸',hip:[-0.07,0.84,0.04],cy:-40,lh:[-0.06,1.08,0.36],rh:[-0.36,1.05,-0.05]},
+ {d:2.2,t:'【擠】身體轉回正面，右手搭在左腕內側，重心前移向前擠出',b:'呼',hip:[0.06,0.84,0.25],cy:0,lh:[0.02,1.2,0.6],rh:[0,1.17,0.52]},
+ {d:2,t:'兩手分開與肩同寬，重心後坐，兩手屈肘收到腹前',b:'吸',hip:[-0.07,0.84,0.04],lh:[0.16,1.03,0.32],rh:[-0.16,1.03,0.32]},
+ {d:2.2,t:'【按】重心前移成弓步，兩手向前上方按出',b:'呼',hip:[0.06,0.84,0.25],lh:[0.16,1.28,0.66],rh:[-0.16,1.28,0.66]}]},
+{n:'單鞭',en:'Single Whip',q:'太極 單鞭',anchor:{f:'r',at:[-0.17,0]},k:[
+ {d:2.2,t:'重心後坐，身體右轉，左腳尖內扣；兩手向右平帶',b:'吸',hip:[-0.07,0.84,0.04],cy:-50,lh:[-0.12,1.1,0.36],rh:[-0.42,1.3,0.22],lfy:-35},
+ {d:2,t:'重心移到右腳，右手變勾手；左手經腹前畫弧到右肩前；左腳收到右腳內側',b:'吸',hip:[-0.12,0.85,0.02],rh:[-0.55,1.34,0.18],hook:'r',lh:[-0.14,1.18,0.32],lf:[-0.03,0.03,0.05],lfy:0},
+ {d:1.5,t:'左腳向左前方邁出，腳跟著地',b:'—',lf:[0.38,0,0.28],lfy:30,cy:-20,hook:'r'},
+ {d:2.5,t:'重心前移成左弓步；左掌邊轉邊向前推出，右勾手不動',b:'呼',hip:[0.14,0.84,0.14],cy:30,lh:[0.52,1.3,0.48],hook:'r',rfy:-30}]},
+{n:'雲手',en:'Cloud Hands',q:'太極 雲手',anchor:{f:'r',at:[-0.17,0]},k:[
+ {d:2,t:'重心右移，身體右轉，左腳尖內扣；左手經腹前畫弧到右肩前，右勾手變掌',b:'吸',hip:[-0.08,0.85,0.08],cy:-35,lf:[0.32,0,0.12],lfy:0,rfy:0,rh:[-0.4,1.32,0.28],lh:[-0.12,0.93,0.32]},
+ {d:2.5,t:'重心左移，身體左轉；左手經面前向左雲轉，右手經腹前跟隨',b:'呼',hip:[0.14,0.85,0.08],cy:35,lh:[0.46,1.32,0.3],rh:[0.18,0.93,0.34]},
+ {d:1.4,t:'右腳向左收攏，成小開立步，兩腳平行',b:'—',rf:[0.12,0,0.08],hip:[0.18,0.87,0.09]},
+ {d:2.5,t:'重心右移，身體右轉；右手經面前向右雲轉，左手經腹前跟隨',b:'吸',hip:[0.16,0.85,0.09],cy:-35,rh:[-0.14,1.32,0.3],lh:[0.12,0.93,0.34]},
+ {d:1.4,t:'左腳向左橫開一步',b:'—',lf:[0.52,0,0.1]},
+ {d:2.5,t:'重心左移，身體左轉；左手雲轉到左側，右手跟隨',b:'呼',hip:[0.36,0.85,0.09],cy:35,lh:[0.66,1.32,0.3],rh:[0.4,0.93,0.34]}]},
+{n:'高探馬',en:'High Pat on Horse',q:'太極 高探馬',anchor:{f:'l',at:[0.17,0.1]},k:[
+ {d:1.6,t:'右腳跟進半步，重心後移到右腳；兩手翻掌向上',b:'吸',rf:[-0.12,0,-0.1],rfy:-30,hip:[-0.06,0.86,-0.03],cy:-15,rh:[-0.36,1.3,0.22],lh:[0.32,1.22,0.32]},
+ {d:2.5,t:'左腳稍前移，腳尖點地成虛步；右掌經耳旁向前推出，左手收到腹前',b:'呼',lf:[0.12,0.02,0.25],hip:[-0.07,0.88,-0.05],cy:0,rh:[-0.02,1.44,0.52],lh:[0.06,1.0,0.25]}]},
+{n:'右蹬腳',en:'Right Heel Kick',q:'太極 右蹬腳',anchor:{f:'r',at:[-0.12,-0.1]},k:[
+ {d:2,t:'左手前伸，與右手腕交叉；左腳向左前方上步',b:'吸',lf:[0.22,0,0.45],lfy:20,hip:[0.08,0.85,0.2],cy:15,lh:[0.05,1.25,0.5],rh:[-0.03,1.22,0.47]},
+ {d:1.8,t:'重心前移到左腳，兩手向兩側分開畫弧',b:'呼',hip:[0.18,0.88,0.4],lh:[0.48,1.3,0.4],rh:[-0.3,1.3,0.45],rfy:-30},
+ {d:1.8,t:'右腳收到左腳內側；兩手由下向上，在胸前合抱交叉，右手在外',b:'吸',rf:[0.08,0.04,0.38],rfy:0,hip:[0.2,0.92,0.42],cy:0,lh:[0.15,1.26,0.6],rh:[0.25,1.28,0.64]},
+ {d:1.5,t:'右腿屈膝提起，左腿微屈站穩',b:'吸',rf:[0.06,0.45,0.58],hip:[0.2,0.94,0.42]},
+ {d:2.5,t:'右腳跟向右前方慢慢蹬出；兩手向左右分開，右手與右腿上下相對',b:'呼',rf:[-0.25,0.85,1.15],lh:[0.68,1.4,0.32],rh:[-0.32,1.42,1.0],cy:-10},
+ {d:2,t:'右小腿收回，右腳落在右前方',b:'—',rf:[-0.14,0,0.42],hip:[0.04,0.86,0.42],lh:[0.24,1.0,0.5],rh:[-0.18,1.0,0.5],cy:0,rfy:0}]},
+{n:'十字手',en:'Cross Hands',q:'太極 十字手',anchor:{f:'l',at:[0.18,0]},k:[
+ {d:2.2,t:'重心移到右腳，兩手向兩側畫弧分開',b:'吸',hip:[-0.05,0.85,0],lh:[0.6,1.32,0.18],rh:[-0.6,1.32,0.18],lfy:0,rfy:0},
+ {d:2.2,t:'重心移回中間，兩手向下經腹前畫弧',b:'呼',hip:[0,0.82,0],lh:[0.3,0.85,0.28],rh:[-0.3,0.85,0.28],rf:[-0.18,0,0]},
+ {d:2.5,t:'兩手在腹前交叉，向上抱到胸前，右手在外；兩腿慢慢站起',b:'吸',hip:[0,0.93,0],lh:[-0.04,1.28,0.34],rh:[0.04,1.3,0.39]}]},
+{n:'收勢',en:'Closing',q:'太極 收勢',anchor:{f:'l',at:[0.18,0]},k:[
+ {d:2,t:'兩手翻掌向下，向前分開與肩同寬',b:'呼',lh:[0.18,1.3,0.42],rh:[-0.18,1.3,0.42]},
+ {d:2.6,t:'兩手慢慢下落到兩腿外側，重心移到右腳',b:'呼',lh:[0.2,0.78,0.03],rh:[-0.2,0.78,0.03],hip:[-0.05,0.94,0]},
+ {d:2,t:'左腳收回，併步站立，還原',b:'自然',lf:[-0.06,0,0],hip:[-0.12,0.95,0],lh:[0.08,0.78,0.03],rh:[-0.32,0.78,0.03]}]}
+];
+
+/* ---------- 建立時間軸 ---------- */
+const clone=o=>JSON.parse(JSON.stringify(o));
+const SEGS=[];let TOTAL=0;
+(function build(){
+  let W=null,off=[0,0],t=0;
+  FORMS.forEach((f,fi)=>{
+    if(W&&f.anchor){const ft=f.anchor.f==='l'?W.lf:W.rf;off=[ft[0]-f.anchor.at[0],ft[2]-f.anchor.at[1]];}
+    f.start=t;
+    f.k.forEach((k,ki)=>{
+      const N=W?clone(W):{};N.hook=null;
+      for(const key in k){if(key==='d'||key==='t'||key==='b')continue;const v=k[key];
+        N[key]=Array.isArray(v)?[v[0]+off[0],v[1],v[2]+off[1]]:v;}
+      SEGS.push({fi,ki,start:t,dur:k.d,from:W||N,to:N,t:k.t,b:k.b});
+      t+=k.d;W=N;
+    });
+    f.end=t;
+  });
+  TOTAL=t;
+})();
+
+/* ---------- 插值 ---------- */
+const ease=u=>u<0?0:u>1?1:u*u*(3-2*u);
+const lerp=(a,b,u)=>a+(b-a)*u;
+const lerp3=(a,b,u)=>[lerp(a[0],b[0],u),lerp(a[1],b[1],u),lerp(a[2],b[2],u)];
+function segAt(time){let lo=0,hi=SEGS.length-1;while(lo<hi){const m=(lo+hi+1)>>1;if(SEGS[m].start<=time)lo=m;else hi=m-1;}return SEGS[lo];}
+function poseAt(time){
+  const s=segAt(time),u=ease((time-s.start)/s.dur),A=s.from,B=s.to,P={};
+  for(const key of ['hip','lh','rh','lf','rf'])P[key]=lerp3(A[key],B[key],u);
+  for(const key of ['cy','lfy','rfy'])P[key]=lerp(A[key]||0,B[key]||0,u);
+  for(const f of ['lf','rf']){const d=Math.hypot(A[f][0]-B[f][0],A[f][2]-B[f][2]);
+    if(d>0.04)P[f][1]+=Math.sin(Math.PI*u)*Math.min(0.1,0.04+d*0.1);}
+  P.hook=B.hook||(u<0.5?A.hook:null);
+  return P;
+}
+
+/* ---------- 骨架 ---------- */
+const add=(a,b)=>[a[0]+b[0],a[1]+b[1],a[2]+b[2]],sub=(a,b)=>[a[0]-b[0],a[1]-b[1],a[2]-b[2]],
+  mul=(a,s)=>[a[0]*s,a[1]*s,a[2]*s],dot=(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2],
+  len=a=>Math.hypot(a[0],a[1],a[2]),norm=a=>{const l=len(a)||1;return mul(a,1/l)};
+const Fw=a=>[Math.sin(a),0,Math.cos(a)],Lv=a=>[Math.cos(a),0,-Math.sin(a)];
+function ik(A,T,l1,l2,P){
+  const d=sub(T,A);let dist=len(d);const dir=norm(d);
+  dist=Math.max(Math.abs(l1-l2)+1e-3,Math.min((l1+l2)*0.999,dist));
+  const a=(l1*l1-l2*l2+dist*dist)/(2*dist),h=Math.sqrt(Math.max(0,l1*l1-a*a));
+  let pv=sub(P,A);pv=norm(sub(pv,mul(dir,dot(pv,dir))));
+  return [add(A,add(mul(dir,a),mul(pv,h))),add(A,mul(dir,dist))];
+}
+function skeleton(p){
+  const cy=p.cy*DEG,hy=p.cy*0.5*DEG,H=p.hip,Lh=Lv(hy),Lc=Lv(cy),Fc=Fw(cy);
+  const hipL=add(H,[Lh[0]*0.1,-0.03,Lh[2]*0.1]),hipR=add(H,[-Lh[0]*0.1,-0.03,-Lh[2]*0.1]);
+  const neck=[H[0]+Fc[0]*0.02,H[1]+0.5,H[2]+Fc[2]*0.02];
+  const shL=add(neck,[Lc[0]*0.19,-0.05,Lc[2]*0.19]),shR=add(neck,[-Lc[0]*0.19,-0.05,-Lc[2]*0.19]);
+  const head=[neck[0],neck[1]+0.15,neck[2]];
+  const arm=(sh,hand,s)=>ik(sh,hand,0.29,0.29,add(sh,[Lc[0]*0.18*s-Fc[0]*0.3,-0.6,Lc[2]*0.18*s-Fc[2]*0.3]));
+  const [elL,haL]=arm(shL,p.lh,1),[elR,haR]=arm(shR,p.rh,-1);
+  const leg=(hj,foot,fy,s)=>{const ank=[foot[0],foot[1]+0.07,foot[2]],ff=Fw(fy*DEG);
+    const [kn,an]=ik(hj,ank,0.45,0.45,add(hj,[ff[0]*0.8+Lh[0]*0.12*s,-0.3,ff[2]*0.8+Lh[2]*0.12*s]));
+    const base=[an[0],an[1]-0.05,an[2]];
+    return {kn,an,toe:add(base,mul(ff,0.15)),heel:add(base,mul(ff,-0.05))};};
+  return {H,hipL,hipR,neck,shL,shR,head,Fc,Lc,elL,haL,elR,haR,L:leg(hipL,p.lf,p.lfy,1),R:leg(hipR,p.rf,p.rfy,-1),hook:p.hook};
+}
+
+/* ---------- 繪圖 ---------- */
+const $=id=>document.getElementById(id);
+const cvF=$('cvFront'),cvB=$('cvBack'),cvM=$('cvMap');
+let C={};
+function readColors(){const cs=getComputedStyle(document.documentElement);
+  for(const k of ['paper','panel','ink','muted','line','left','right','torso','torso-edge','skin','hair','ground'])C[k]=cs.getPropertyValue('--'+k).trim();}
+function fit(cv){const r=cv.getBoundingClientRect(),dpr=Math.min(window.devicePixelRatio||1,2);
+  const w=Math.max(1,Math.round(r.width*dpr)),h=Math.max(1,Math.round(r.height*dpr));
+  if(cv.width!==w||cv.height!==h){cv.width=w;cv.height=h;}return [w,h];}
+const cam={x:0,z:0};
+function drawView(cv,back,sk){
+  const [W,Hh]=fit(cv),ctx=cv.getContext('2d');ctx.clearRect(0,0,W,Hh);
+  const S=Hh/2.15,D=6,cx=W/2,eyeY=Hh*0.47;
+  const pr=P=>{const rz=P[2]-cam.z,k=back?D/(D+rz):D/(D-rz),x=(P[0]-cam.x)*(back?-1:1);
+    return [cx+x*S*k,eyeY-(P[1]-1.0)*S*k,k];};
+  // ground
+  const g=pr([cam.x,0,cam.z]);
+  ctx.fillStyle=C.ground;ctx.beginPath();ctx.ellipse(cx,g[1]+S*0.02,W*0.42,S*0.09,0,0,Math.PI*2);ctx.fill();
+  for(const ft of [sk.L,sk.R]){const s=pr([ft.an[0],0,ft.an[2]]);ctx.fillStyle=C.line;ctx.beginPath();
+    ctx.ellipse(s[0],s[1],S*0.07*s[2],S*0.018*s[2],0,0,Math.PI*2);ctx.globalAlpha=0.9;ctx.fill();ctx.globalAlpha=1;}
+  const items=[],dz=z=>back?-z:z;
+  const lim=(a,b,col,w,extra)=>items.push({z:dz((a[2]+b[2])/2),f:(fade)=>{const A=pr(a),B=pr(b);
+    ctx.strokeStyle=col;ctx.globalAlpha=fade;ctx.lineCap='round';ctx.lineWidth=w*S*(A[2]+B[2])/2;
+    ctx.beginPath();ctx.moveTo(A[0],A[1]);ctx.lineTo(B[0],B[1]);ctx.stroke();extra&&extra(A,B);ctx.globalAlpha=1;}});
+  const handDot=(isHook,col)=>(A,B)=>{ctx.fillStyle=col;ctx.beginPath();ctx.arc(B[0],B[1],0.042*S*B[2],0,Math.PI*2);ctx.fill();
+    if(isHook){ctx.lineWidth=0.025*S*B[2];ctx.beginPath();ctx.arc(B[0],B[1]+0.04*S*B[2],0.035*S*B[2],-Math.PI*0.2,Math.PI*1.1);ctx.stroke();}};
+  // legs
+  for(const [leg,hj,col] of [[sk.L,sk.hipL,C.left],[sk.R,sk.hipR,C.right]]){
+    lim(hj,leg.kn,col,0.12);lim(leg.kn,leg.an,col,0.095);lim(leg.heel,leg.toe,col,0.07);}
+  // arms
+  const n0=items.length;
+  lim(sk.shL,sk.elL,C.left,0.085);lim(sk.elL,sk.haL,C.left,0.07,handDot(sk.hook==='l',C.left));
+  lim(sk.shR,sk.elR,C.right,0.085);lim(sk.elR,sk.haR,C.right,0.07,handDot(sk.hook==='r',C.right));
+  for(let i=n0;i<items.length;i++)items[i].arm=true;
+  // torso
+  const tz=(sk.shL[2]+sk.shR[2]+sk.hipL[2]+sk.hipR[2])/4;
+  items.push({z:dz(tz),torso:true,f:()=>{const pts=[sk.shL,sk.shR,sk.hipR,sk.hipL].map(pr);
+    ctx.fillStyle=C.torso;ctx.strokeStyle=C['torso-edge'];ctx.lineWidth=Math.max(1,S*0.008);ctx.lineJoin='round';
+    ctx.beginPath();pts.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.closePath();ctx.fill();ctx.stroke();
+    const n=pr(sk.neck),h=pr(sk.head);ctx.strokeStyle=C.skin;ctx.lineWidth=0.06*S*n[2];ctx.lineCap='round';
+    ctx.beginPath();ctx.moveTo(n[0],n[1]);ctx.lineTo(h[0],h[1]+0.06*S);ctx.stroke();
+    // 腰帶
+    const a=pr(lerp3(sk.shL,sk.hipL,0.78)),b=pr(lerp3(sk.shR,sk.hipR,0.78));ctx.strokeStyle=C['torso-edge'];ctx.lineWidth=S*0.012;
+    ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1]);ctx.stroke();}});
+  // head
+  items.push({z:dz(sk.head[2])+0.001,f:()=>{const h=pr(sk.head),r=0.1*S*h[2];
+    const Fh=sk.Fc,facing=back?-Fh[2]:Fh[2],lat=(back?-Fh[0]:Fh[0]);
+    ctx.fillStyle=C.skin;ctx.beginPath();ctx.arc(h[0],h[1],r,0,Math.PI*2);ctx.fill();
+    ctx.save();ctx.beginPath();ctx.arc(h[0],h[1],r,0,Math.PI*2);ctx.clip();
+    ctx.fillStyle=C.hair;ctx.beginPath();ctx.arc(h[0]-lat*r*0.8,h[1]-r*0.78*Math.max(0,facing),r*1.02,0,Math.PI*2);ctx.fill();ctx.restore();
+    if(facing>0.15){const L=sk.Lc;ctx.fillStyle=C.hair;for(const s of [1,-1]){
+      const e=pr(add(sk.head,[Fh[0]*0.09+L[0]*0.038*s,-0.005,Fh[2]*0.09+L[2]*0.038*s]));
+      ctx.beginPath();ctx.arc(e[0],e[1],Math.max(1,0.011*S),0,Math.PI*2);ctx.fill();}}
+    ctx.strokeStyle=C['torso-edge'];ctx.lineWidth=Math.max(1,S*0.006);ctx.beginPath();ctx.arc(h[0],h[1],r,0,Math.PI*2);ctx.stroke();}});
+  items.sort((a,b)=>a.z-b.z);
+  for(const it of items){const behind=it.arm&&it.z<dz(tz)-0.06;it.f(behind?0.55:1);}
+}
+const formFeet=FORMS.map(f=>{const pts=[];SEGS.filter(s=>s.fi===FORMS.indexOf(f)).forEach(s=>{
+  pts.push({p:s.to.lf,y:s.to.lfy,s:'l'},{p:s.to.rf,y:s.to.rfy,s:'r'});});
+  const first=SEGS.find(s=>s.fi===FORMS.indexOf(f));pts.push({p:first.from.lf,y:first.from.lfy,s:'l'},{p:first.from.rf,y:first.from.rfy,s:'r'});
+  let x0=1e9,x1=-1e9,z0=1e9,z1=-1e9;pts.forEach(o=>{x0=Math.min(x0,o.p[0]);x1=Math.max(x1,o.p[0]);z0=Math.min(z0,o.p[2]);z1=Math.max(z1,o.p[2]);});
+  return {pts:pts.filter(o=>o.p[1]<0.06),cx:(x0+x1)/2,cz:(z0+z1)/2,span:Math.max(x1-x0,z1-z0)+0.6};});
+function drawMap(fi,p){
+  const [W,H]=fit(cvM),ctx=cvM.getContext('2d');ctx.clearRect(0,0,W,H);
+  const ff=formFeet[fi],s=Math.min(W,H)/Math.max(1.1,ff.span),cx=W/2,cy=H/2+H*0.04;
+  const pr=(x,z)=>[cx-(x-ff.cx)*s,cy-(z-ff.cz)*s];
+  ctx.strokeStyle=C.line;ctx.lineWidth=1;
+  for(let g=-3;g<=3;g++){const a=pr(ff.cx+g*0.25,ff.cz-3),b=pr(ff.cx+g*0.25,ff.cz+3);ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1]);ctx.stroke();
+    const c=pr(ff.cx-3,ff.cz+g*0.25),d=pr(ff.cx+3,ff.cz+g*0.25);ctx.beginPath();ctx.moveTo(c[0],c[1]);ctx.lineTo(d[0],d[1]);ctx.stroke();}
+  const foot=(o,fill,alpha)=>{const [x,y]=pr(o.p[0],o.p[2]),a=o.y*DEG;ctx.save();ctx.translate(x,y);ctx.rotate(a);ctx.globalAlpha=alpha;
+    ctx.beginPath();if(ctx.roundRect)ctx.roundRect(-0.045*s,-0.16*s,0.09*s,0.21*s,0.045*s);else ctx.rect(-0.045*s,-0.16*s,0.09*s,0.21*s);
+    if(fill){ctx.fillStyle=o.s==='l'?C.left:C.right;ctx.fill();}else{ctx.strokeStyle=o.s==='l'?C.left:C.right;ctx.lineWidth=1.2;ctx.stroke();}
+    ctx.restore();};
+  ff.pts.forEach(o=>foot(o,false,0.45));
+  foot({p:p.lf,y:p.lfy,s:'l'},true,p.lf[1]>0.05?0.4:1);foot({p:p.rf,y:p.rfy,s:'r'},true,p.rf[1]>0.05?0.4:1);
+  const [hx,hz]=pr(p.hip[0],p.hip[2]),a=p.cy*DEG;
+  ctx.strokeStyle=C.ink;ctx.fillStyle=C.ink;ctx.lineWidth=2;ctx.beginPath();ctx.arc(hx,hz,3,0,Math.PI*2);ctx.fill();
+  const ex=hx-Math.sin(a)*0.22*s,ez=hz-Math.cos(a)*0.22*s;ctx.beginPath();ctx.moveTo(hx,hz);ctx.lineTo(ex,ez);ctx.stroke();
+  ctx.beginPath();ctx.arc(ex,ez,3,0,Math.PI*2);ctx.fill();
+}
+
+/* ---------- 介面 ---------- */
+const chips=$('chips'),list=$('formList');
+FORMS.forEach((f,i)=>{const b=document.createElement('button');b.type='button';b.textContent=(i+1)+' '+f.n;b.onclick=()=>{jump(i);};chips.appendChild(b);
+  const li=document.createElement('li');li.innerHTML=f.n+'（'+f.en+'）・<a href="https://www.youtube.com/results?search_query='+encodeURIComponent(f.q)+'" target="_blank" rel="noopener">YouTube 示範影片</a>';list.appendChild(li);});
+let time=0,playing=false,speed=1,lastSeg=null,lastFi=-1;
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+function curForm(){return segAt(time).fi;}
+function jump(i){i=Math.max(0,Math.min(FORMS.length-1,i));time=FORMS[i].start+0.0001;camSnap=true;lastSeg=null;}
+let camSnap=true;
+function speak(txt){if(!$('voice').checked)return;try{const sy=window.speechSynthesis;if(!sy)return;sy.cancel();
+  const u=new SpeechSynthesisUtterance(txt.replace(/【|】/g,''));u.lang='zh-TW';u.rate=0.95;sy.speak(u);}catch(e){}}
+function updateText(s){
+  const f=FORMS[s.fi];
+  if(s.fi!==lastFi){$('formName').textContent=f.n;$('formEn').textContent=f.en;$('formNum').textContent='第 '+(s.fi+1)+' 式／共 '+FORMS.length+' 式';
+    [...chips.children].forEach((b,i)=>b.setAttribute('aria-current',i===s.fi?'true':'false'));lastFi=s.fi;}
+  if(s!==lastSeg){$('cue').textContent=s.t;$('step').textContent='步驟 '+(s.ki+1)+'／'+f.k.length;
+    const br=$('breath');br.textContent=s.b==='—'?'移步':s.b;br.className=s.b==='吸'?'in':s.b==='呼'?'out':'';
+    if(playing)speak((s.ki===0?f.n+'。':'')+s.t);lastSeg=s;}
+}
+function render(){
+  readColors();
+  const p=poseAt(time),sk=skeleton(p);
+  const tx=(p.lf[0]+p.rf[0])/2*0.6,tz=(p.lf[2]+p.rf[2])/2;
+  if(camSnap){cam.x=tx;cam.z=tz;camSnap=false;}else{cam.x+=(tx-cam.x)*0.04;cam.z+=(tz-cam.z)*0.04;}
+  drawView(cvF,false,sk);drawView(cvB,true,sk);
+  const s=segAt(time);drawMap(s.fi,p);updateText(s);
+  $('scrub').value=Math.round(time/TOTAL*1000);
+}
+let last=performance.now();
+function frame(now){const dt=Math.min(0.1,(now-last)/1000);last=now;
+  if(playing){time+=dt*speed;const fi=curForm();
+    if($('loop').checked&&time>=FORMS[fi].end-0.001&&playing){time=FORMS[fi].start+0.0001;camSnap=false;lastSeg=null;}
+    if(time>=TOTAL){time=TOTAL-0.0001;setPlay(false);}}
+  render();requestAnimationFrame(frame);}
+function setPlay(v){playing=v;$('play').textContent=v?'❚❚ 暫停':'▶ 播放';if(v){lastSeg=null;}else{try{speechSynthesis.cancel()}catch(e){}}}
+$('play').onclick=()=>{if(!playing&&time>=TOTAL-0.01)jump(0);setPlay(!playing);};
+$('prev').onclick=()=>{const fi=curForm(),inForm=time-FORMS[fi].start;jump(inForm>1.5?fi:fi-1);};
+$('next').onclick=()=>jump(curForm()+1);
+$('speed').onchange=e=>{speed=+e.target.value;};
+$('scrub').oninput=e=>{time=Math.min(TOTAL-0.0001,e.target.value/1000*TOTAL);camSnap=true;};
+$('voice').onchange=e=>{if(e.target.checked&&lastSeg)speak(lastSeg.t);};
+document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT'||e.target.tagName==='SELECT')return;
+  if(e.code==='Space'){e.preventDefault();$('play').click();}else if(e.key==='ArrowRight')$('next').click();else if(e.key==='ArrowLeft')$('prev').click();});
+window.__taichi={seek:t=>{time=t;camSnap=true;render();},total:()=>TOTAL,forms:FORMS};
+jump(0);time=0.0001;
+if(!reduce)setPlay(false);
+requestAnimationFrame(frame);
+})();
+</script>

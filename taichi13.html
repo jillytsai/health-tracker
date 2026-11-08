@@ -37,7 +37,11 @@ header small{color:var(--muted);font-size:.8rem}
 .stage{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .view{margin:0;background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden;position:relative}
 .view canvas{display:block;width:100%;aspect-ratio:3/4;max-width:100%}
-.view figcaption{position:absolute;left:8px;top:6px;font-size:.75rem;color:var(--muted);letter-spacing:.06em}
+.view canvas.gl,.mini canvas.gl{position:absolute;inset:0;width:100%;height:100%;aspect-ratio:auto;visibility:hidden}
+body.has3d canvas.gl{visibility:visible}
+body.has3d #cvFront,body.has3d #cvBack,body.has3d #cvSide{visibility:hidden}
+.loading3d{position:absolute;left:0;right:0;bottom:8px;text-align:center;font-size:.75rem;color:var(--muted)}
+.view figcaption{z-index:1;position:absolute;left:8px;top:6px;font-size:.75rem;color:var(--muted);letter-spacing:.06em}
 .view figcaption b{color:var(--ink);font-weight:700}
 .cuebox{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:12px;align-items:start}
 .cuetext{min-width:0;display:flex;flex-direction:column;gap:6px}
@@ -52,7 +56,7 @@ header small{color:var(--muted);font-size:.8rem}
 .minis{display:grid;grid-template-columns:1fr 1fr;gap:8px;min-width:0}
 .mini{background:var(--panel);border:1px solid var(--line);border-radius:10px;position:relative;overflow:hidden}
 .mini canvas{display:block;width:100%;aspect-ratio:3/4;max-width:100%}
-.mini span{position:absolute;left:6px;top:4px;font-size:.68rem;color:var(--muted)}
+.mini span{z-index:1;position:absolute;left:6px;top:4px;font-size:.68rem;color:var(--muted)}
 @media (max-width:560px){.cuebox{grid-template-columns:1fr}}
 .scrub{width:100%;accent-color:var(--accent)}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
@@ -93,8 +97,8 @@ button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visi
   </section>
 
   <section class="stage">
-    <figure class="view"><canvas id="cvFront" aria-label="正面視角動畫"></canvas><figcaption><b>正面</b>・老師面對你</figcaption></figure>
-    <figure class="view"><canvas id="cvBack" aria-label="背面視角動畫"></canvas><figcaption><b>背面</b>・跟著一起做</figcaption></figure>
+    <figure class="view"><canvas id="cvFront" aria-label="正面視角動畫"></canvas><canvas class="gl" id="cvFront3d" aria-hidden="true"></canvas><span class="loading3d" hidden></span><figcaption><b>正面</b>・老師面對你</figcaption></figure>
+    <figure class="view"><canvas id="cvBack" aria-label="背面視角動畫"></canvas><canvas class="gl" id="cvBack3d" aria-hidden="true"></canvas><span class="loading3d" hidden></span><figcaption><b>背面</b>・跟著一起做</figcaption></figure>
   </section>
 
   <section class="cuebox">
@@ -105,7 +109,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visi
       <p class="tip"><b>要領</b> <span id="tip"></span></p>
     </div>
     <div class="minis">
-      <div class="mini"><canvas id="cvSide" aria-label="側面視角動畫"></canvas><span>側面・看鬆腰落胯</span></div>
+      <div class="mini"><canvas id="cvSide" aria-label="側面視角動畫"></canvas><canvas class="gl" id="cvSide3d" aria-hidden="true"></canvas><span>側面・看鬆腰落胯</span></div>
       <div class="mini map"><canvas id="cvMap" aria-label="腳步俯視圖"></canvas><span>腳步俯視 ↑前</span></div>
     </div>
   </section>
@@ -132,6 +136,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visi
     <p>「十三式」在不同流派有不同內容（例如武當十三勢、八法五步、各地社團的精簡套路）。這裡採用最普及的簡化二十四式太極拳中選出的 13 個代表動作，依原套路順序串成一套：</p>
     <ol id="formList"></ol>
     <p>動畫是依動作要領編排的示意，不是逐格複製某支影片。若你的老師教的是別的版本，把招式名單給我，我可以改成那一套。</p>
+    <p>3D 人物模型：three.js 範例模型 Xbot（擬真人偶）與 Michelle（女性角色），皆為 Mixamo 角色，可在下方「人物」切換。手腕、腳踝的彩色護環標示左右：藍綠＝左、橘＝右。</p>
     <p>練習提醒：膝蓋不超過腳尖、動作慢而勻、呼吸自然；有高血壓或關節問題請量力而為。</p>
   </details>
 </div>
@@ -146,12 +151,177 @@ button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visi
     <div class="opts">
       <label for="speed">速度</label>
       <select id="speed"><option value="0.5">0.5×</option><option value="0.75">0.75×</option><option value="1" selected>1×</option><option value="1.5">1.5×</option></select>
+      <label for="model3d">人物</label>
+      <select id="model3d"><option value="Xbot.glb">擬真人偶</option><option value="Michelle.glb">女性角色</option></select>
       <label><input type="checkbox" id="zoom"> 手部特寫</label>
       <label><input type="checkbox" id="loop"> 重複這一式</label>
       <label><input type="checkbox" id="voice"> 語音口令</label>
     </div>
   </div>
 </div>
+
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+<script type="module">
+import * as THREE from 'three';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+const Vec=THREE.Vector3,Quat=THREE.Quaternion;
+const v3=a=>new Vec(a[0],a[1],a[2]);
+const SC=0.926,ANK=0.115,ARM=0.458/0.56;
+const T3={ready:false};window.__tc3d=T3;
+function setStatus(t){document.querySelectorAll('.loading3d').forEach(e=>{e.textContent=t;e.hidden=!t;});}
+let renderers=[];
+try{
+  for(const [id,view] of [['cvFront3d','front'],['cvBack3d','back'],['cvSide3d','side']]){
+    const canvas=document.getElementById(id);
+    const r=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true,preserveDrawingBuffer:true});
+    r.setPixelRatio(Math.min(window.devicePixelRatio||1,1.5));r.shadowMap.enabled=true;r.shadowMap.type=THREE.PCFSoftShadowMap;
+    r.toneMapping=THREE.ACESFilmicToneMapping;r.toneMappingExposure=1.05;
+    renderers.push({r,canvas,view,cam:new THREE.PerspectiveCamera(24,0.75,0.1,30)});
+  }
+}catch(e){renderers=[];setStatus('');}
+const scene=new THREE.Scene();
+scene.add(new THREE.HemisphereLight(0xffffff,0x9aa59f,1.5));
+const keyL=new THREE.DirectionalLight(0xffffff,2.0);keyL.position.set(1.5,4,3.5);keyL.castShadow=true;
+keyL.shadow.mapSize.set(1024,1024);Object.assign(keyL.shadow.camera,{left:-2,right:2,top:2.5,bottom:-1,near:0.5,far:12});keyL.shadow.bias=-0.0005;
+scene.add(keyL);scene.add(keyL.target);
+const rim=new THREE.DirectionalLight(0xffffff,0.9);rim.position.set(-2,2.5,-3.5);scene.add(rim);
+const ground=new THREE.Mesh(new THREE.PlaneGeometry(12,12).rotateX(-Math.PI/2),new THREE.ShadowMaterial({opacity:0.22}));ground.receiveShadow=true;scene.add(ground);
+const disc=new THREE.Mesh(new THREE.CircleGeometry(0.9,48).rotateX(-Math.PI/2),new THREE.MeshBasicMaterial({color:0x000000,transparent:true,opacity:0.05}));disc.position.y=0.001;scene.add(disc);
+
+let B={},rest={},model=null,fingerAxis={},thumbAxis={},bands={};
+const W=(o)=>{const v=new Vec();o.getWorldPosition(v);return v;};
+const WQ=(o)=>{const q=new Quat();o.getWorldQuaternion(q);return q;};
+function setWorldQuat(b,q){const pq=WQ(b.parent).invert();b.quaternion.copy(pq.multiply(q));b.updateMatrixWorld(true);}
+function frame(d,s){d=d.clone().normalize();s=s.clone().sub(d.clone().multiplyScalar(s.dot(d)));
+  if(s.lengthSq()<1e-6)s=Math.abs(d.y)<0.9?new Vec(0,1,0).sub(d.clone().multiplyScalar(d.y)):new Vec(1,0,0);s.normalize();
+  const t=new Vec().crossVectors(d,s);return new THREE.Matrix4().makeBasis(d,s,t);}
+function aim(b,d,s){const r=rest[b.name];const M=frame(d,s).multiply(r.F.clone().transpose());
+  const q=new Quat().setFromRotationMatrix(M).multiply(r.q);setWorldQuat(b,q);}
+const yawQ=a=>new Quat().setFromAxisAngle(new Vec(0,1,0),a);
+
+function load3d(file){
+  if(!renderers.length)return;
+  setStatus('載入 3D 人物中…');T3.ready=false;
+  const key=file.replace('.glb','');
+  const go=()=>{const b64=window.__GLB[key];const bin=atob(b64);const buf=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)buf[i]=bin.charCodeAt(i);
+  new GLTFLoader().parse(buf.buffer,'',g=>{
+    if(model){scene.remove(model);}
+    for(const S in bands){scene.remove(bands[S].wb,bands[S].ab);}
+    B={};rest={};
+    model=g.scene;model.traverse(o=>{if(o.isMesh){o.castShadow=true;o.frustumCulled=false;
+      if(file==='Xbot.glb'){const joint=/Joint/i.test(o.material.name);o.material=new THREE.MeshStandardMaterial({color:joint?0x5f6b68:0xe9e4dc,roughness:joint?0.5:0.65,metalness:0.0});}}});
+    const fwdTest=()=>{model.updateMatrixWorld(true);const f=model.getObjectByName('mixamorigLeftFoot'),t=model.getObjectByName('mixamorigLeftToeBase');return W(t).z-W(f).z;};
+    const mixer=new THREE.AnimationMixer(model);mixer.clipAction(g.animations.find(a=>a.name==='TPose')||g.animations[0]).play();mixer.update(0);mixer.stopAllAction();
+    if(fwdTest()<0)model.rotation.y=Math.PI;
+    model.updateMatrixWorld(true);
+    model.traverse(o=>{if(o.name&&o.name.startsWith('mixamorig'))B[o.name.replace('mixamorig','')]=o;});
+    for(const k in B){const b=B[k];rest[b.name]={q:WQ(b),lq:b.quaternion.clone(),p:W(b)};}
+    const setF=(name,d0,s0)=>{rest[B[name].name].F=frame(d0,s0);};
+    for(const [S,sg] of [['Left',1],['Right',-1]]){
+      setF(S+'Arm',rest[B[S+'ForeArm'].name].p.clone().sub(rest[B[S+'Arm'].name].p),new Vec(0,0,1));
+      setF(S+'ForeArm',rest[B[S+'Hand'].name].p.clone().sub(rest[B[S+'ForeArm'].name].p),new Vec(0,-1,0));
+      setF(S+'Hand',rest[B[S+'HandMiddle1'].name].p.clone().sub(rest[B[S+'Hand'].name].p),new Vec(0,-1,0));
+      setF(S+'UpLeg',rest[B[S+'Leg'].name].p.clone().sub(rest[B[S+'UpLeg'].name].p),new Vec(0,0,1));
+      setF(S+'Leg',rest[B[S+'Foot'].name].p.clone().sub(rest[B[S+'Leg'].name].p),new Vec(0,0,1));
+      // 偵測手指彎曲的旋轉軸：讓指尖往掌心(向下)移動最多的那一軸
+      const axes=[[1,0,0],[-1,0,0],[0,1,0],[0,-1,0],[0,0,1],[0,0,-1]].map(a=>new Vec(...a));
+      const b1=B[S+'HandIndex1'],tip=B[S+'HandIndex4'];let best=null,bv=-1e9;const t0=W(tip);
+      for(const ax of axes){b1.quaternion.copy(rest[b1.name].lq).multiply(new Quat().setFromAxisAngle(ax,0.5));b1.updateMatrixWorld(true);
+        const dv=t0.y-W(tip).y;if(dv>bv){bv=dv;best=ax;}}
+      b1.quaternion.copy(rest[b1.name].lq);b1.updateMatrixWorld(true);fingerAxis[S]=best;
+      const th=B[S+'HandThumb2'],ttip=B[S+'HandThumb4'],palmC=W(B[S+'HandMiddle1']);let tb=null,tv=1e9;
+      for(const ax of axes){th.quaternion.copy(rest[th.name].lq).multiply(new Quat().setFromAxisAngle(ax,0.6));th.updateMatrixWorld(true);
+        const dd=W(ttip).distanceTo(palmC);if(dd<tv){tv=dd;tb=ax;}}
+      th.quaternion.copy(rest[th.name].lq);th.updateMatrixWorld(true);thumbAxis[S]=tb;
+    }
+    T3.len={arm:[rest[B.LeftForeArm.name].p.distanceTo(rest[B.LeftArm.name].p),rest[B.LeftHand.name].p.distanceTo(rest[B.LeftForeArm.name].p)],
+      leg:[rest[B.LeftLeg.name].p.distanceTo(rest[B.LeftUpLeg.name].p),rest[B.LeftFoot.name].p.distanceTo(rest[B.LeftLeg.name].p)]};
+    T3.hipOff=rest[B.Hips.name].p.clone().sub(rest[B.LeftUpLeg.name].p.clone().add(rest[B.RightUpLeg.name].p).multiplyScalar(0.5));
+    // 彩色護腕、護踝：左＝藍綠、右＝橘
+    const cs=getComputedStyle(document.documentElement);
+    for(const [S,col] of [['Left',cs.getPropertyValue('--left').trim()],['Right',cs.getPropertyValue('--right').trim()]]){
+      const mat=new THREE.MeshStandardMaterial({color:new THREE.Color(col||'#888'),roughness:0.6});
+      const wb=new THREE.Mesh(new THREE.TorusGeometry(0.036,0.011,10,28),mat),ab=new THREE.Mesh(new THREE.TorusGeometry(0.052,0.013,10,28),mat);
+      wb.castShadow=ab.castShadow=true;scene.add(wb,ab);bands[S]={wb,ab};}
+    scene.add(model);T3.ready=true;setStatus('');document.body.classList.add('has3d');
+  },(e)=>{console.error('load3d',e);setStatus('');});};
+  if(window.__GLB&&window.__GLB[key])return go();
+  const sc=document.createElement('script');sc.src='models/'+key.toLowerCase()+'.js';sc.onload=go;sc.onerror=()=>setStatus('');document.head.appendChild(sc);
+}
+T3.load=load3d;
+let pick='Xbot.glb';try{pick=localStorage.getItem('tc_model')||pick;}catch(e){}
+if(pick!=='Xbot.glb'&&pick!=='Michelle.glb')pick='Xbot.glb';
+const selM=document.getElementById('model3d');if(selM){selM.value=pick;selM.onchange=e=>{try{localStorage.setItem('tc_model',e.target.value)}catch(_){ }load3d(e.target.value);};}
+load3d(pick);
+
+function ik(A,T,l1,l2,P){const d=T.clone().sub(A);let dist=d.length();const dir=d.normalize();
+  dist=Math.max(Math.abs(l1-l2)+1e-3,Math.min((l1+l2)*0.998,dist));
+  const a=(l1*l1-l2*l2+dist*dist)/(2*dist),h=Math.sqrt(Math.max(0,l1*l1-a*a));
+  const pv=P.clone().sub(A);pv.sub(dir.clone().multiplyScalar(pv.dot(dir)));if(pv.lengthSq()<1e-8)pv.set(0,0,1);pv.normalize();
+  return [A.clone().add(dir.clone().multiplyScalar(a)).add(pv.multiplyScalar(h)),A.clone().add(dir.clone().multiplyScalar(dist))];}
+const mapP=a=>new Vec(a[0]*SC,a[1]*SC,a[2]*SC);
+
+function pose(sk,p){
+  const DEG=Math.PI/180,cy=p.cy*DEG,hy=p.cy*0.5*DEG;
+  // 骨盆：轉腰 + 落胯時尾閭微收
+  const qh=yawQ(hy).multiply(new Quat().setFromAxisAngle(new Vec(1,0,0),-0.09*p.sink));
+  const hips=B.Hips;
+  const mid=sk.hipL.map((v,i)=>(v+sk.hipR[i])/2);
+  const D=new Vec(mid[0]*SC,ANK+(mid[1]-0.075)*SC*1.045,mid[2]*SC);
+  const hp=D.add(T3.hipOff.clone().applyQuaternion(qh));
+  hips.position.copy(hips.parent.worldToLocal(hp));setWorldQuat(hips,qh.clone().multiply(rest[hips.name].q));
+  // 脊椎逐節轉向胸口方向，保持上身中正
+  [['Spine',0.35],['Spine1',0.7],['Spine2',1]].forEach(([n,t])=>setWorldQuat(B[n],yawQ(hy+(cy-hy)*t).multiply(rest[B[n].name].q)));
+  for(const n of ['Neck','Head','LeftShoulder','RightShoulder'])setWorldQuat(B[n],yawQ(cy).multiply(rest[B[n].name].q));
+  // 手臂
+  const L=T3.len;
+  for(const [S,sh,el,hd] of [['Left',sk.shL,sk.elL,sk.hL],['Right',sk.shR,sk.elR,sk.hR]]){
+    const A=W(B[S+'Arm']);const T=A.clone().add(v3(hd.wr).sub(v3(sh)).multiplyScalar(ARM));const P=A.clone().add(v3(el).sub(v3(sh)));
+    const [E,Wr]=ik(A,T,L.arm[0],L.arm[1],P);
+    const d1=E.clone().sub(A),d2=Wr.clone().sub(E);
+    let n=v3(hd.n),f=v3(hd.f);if(hd.hook){f=f.multiplyScalar(0.25).add(new Vec(0,-1,0)).normalize();}
+    const bend=d2.clone().sub(d1.clone().normalize().multiplyScalar(d2.dot(d1.clone().normalize())));
+    aim(B[S+'Arm'],d1,bend.lengthSq()>1e-5?bend:P.clone().sub(A));
+    aim(B[S+'ForeArm'],d2,n);
+    aim(B[S+'Hand'],f,n);
+    // 手指：掌＝自然伸直微屈；勾手＝五指撮攏
+    const c=hd.hook?1:0;const ax=fingerAxis[S];
+    for(const fn of ['Index','Middle','Ring','Pinky'])[1,2,3].forEach((k,i)=>{const b=B[S+'Hand'+fn+k];if(!b)return;
+      const ang=[0.1,0.14,0.1][i]*(1-c)+[0.9,1.15,0.8][i]*c;b.quaternion.copy(rest[b.name].lq).multiply(new Quat().setFromAxisAngle(ax,ang));});
+    [2,3].forEach((k,i)=>{const b=B[S+'HandThumb'+k];if(b)b.quaternion.copy(rest[b.name].lq).multiply(new Quat().setFromAxisAngle(thumbAxis[S],(0.12+0.5*c)*(i?0.8:1)));});
+    B[S+'Hand'].updateMatrixWorld(true);
+    const wb=bands[S].wb;wb.position.copy(W(B[S+'Hand'])).add(d2.clone().normalize().multiplyScalar(-0.035));wb.quaternion.setFromUnitVectors(new Vec(0,0,1),d2.clone().normalize());
+  }
+  // 腿
+  for(const [S,lg,ft,fy] of [['Left',sk.L,p.lf,p.lfy],['Right',sk.R,p.rf,p.rfy]]){
+    const H=W(B[S+'UpLeg']);const T=new Vec(ft[0]*SC,ft[1]*SC+ANK,ft[2]*SC);const P=H.clone().add(v3(lg.kn).sub(v3(lg.hj)));
+    const [K,An]=ik(H,T,L.leg[0],L.leg[1],P);
+    const ff=new Vec(Math.sin(fy*DEG),0,Math.cos(fy*DEG));
+    const d1=K.clone().sub(H),d2=An.clone().sub(K);
+    const kneeDir=K.clone().sub(H.clone().add(An).multiplyScalar(0.5));
+    aim(B[S+'UpLeg'],d1,kneeDir.lengthSq()>1e-5?kneeDir.add(ff.clone().multiplyScalar(0.02)):ff);
+    aim(B[S+'Leg'],d2,kneeDir.lengthSq()>1e-5?kneeDir:ff);
+    setWorldQuat(B[S+'Foot'],yawQ(fy*DEG).multiply(rest[B[S+'Foot'].name].q));
+    const ab=bands[S].ab;ab.position.copy(W(B[S+'Foot'])).add(d2.clone().normalize().multiplyScalar(-0.06));ab.quaternion.setFromUnitVectors(new Vec(0,0,1),d2.clone().normalize());
+  }
+}
+T3.render=(sk,p,zoomed,cam)=>{
+  if(!T3.ready)return;
+  pose(sk,p);
+  const chest=W(B.Spine2);
+  for(const R of renderers){
+    const cv=R.canvas,w=cv.clientWidth,h=cv.clientHeight;if(!w||!h)continue;
+    if(cv.width!==Math.round(w*R.r.getPixelRatio())||cv.height!==Math.round(h*R.r.getPixelRatio()))R.r.setSize(w,h,false);
+    const z=zoomed&&R.view!=='side';
+    const c=z?new Vec(chest.x,chest.y-0.05,chest.z):new Vec(cam.x*SC,0.86,cam.z*SC);
+    const halfH=z?0.5:1.0,dist=halfH/Math.tan(12*Math.PI/180);
+    const dir=R.view==='front'?new Vec(0,0.06,1):R.view==='back'?new Vec(0,0.06,-1):new Vec(1,0.04,0);
+    R.cam.aspect=w/h;R.cam.position.copy(c).add(dir.normalize().multiplyScalar(dist));R.cam.lookAt(c);R.cam.updateProjectionMatrix();
+    keyL.position.set(c.x+1.5,4,c.z+3.5);keyL.target.position.copy(c);
+    R.r.render(scene,R.cam);
+  }
+};
+</script>
 
 <script>
 (()=>{
@@ -495,7 +665,8 @@ function render(){
   const p=poseAt(time),sk=skeleton(p);
   const tx=(p.lf[0]+p.rf[0])/2*0.6,tz=(p.lf[2]+p.rf[2])/2;
   if(camSnap){cam.x=tx;cam.z=tz;camSnap=false;}else{cam.x+=(tx-cam.x)*0.04;cam.z+=(tz-cam.z)*0.04;}
-  drawView(cvF,'front',sk,zoomed);drawView(cvB,'back',sk,zoomed);drawView(cvS,'side',sk,false);
+  const T3=window.__tc3d;
+  if(T3&&T3.ready){T3.render(sk,p,zoomed,cam);}else{drawView(cvF,'front',sk,zoomed);drawView(cvB,'back',sk,zoomed);drawView(cvS,'side',sk,false);}
   const s=segAt(time);drawMap(s.fi,p);updateText(s);
   $('scrub').value=Math.round(time/TOTAL*1000);
 }
@@ -515,7 +686,7 @@ $('zoom').onchange=e=>{zoomed=e.target.checked;};
 $('voice').onchange=e=>{if(e.target.checked&&lastSeg)speak(lastSeg.t);};
 document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT'||e.target.tagName==='SELECT')return;
   if(e.code==='Space'){e.preventDefault();$('play').click();}else if(e.key==='ArrowRight')$('next').click();else if(e.key==='ArrowLeft')$('prev').click();});
-window.__taichi={seek:t=>{time=t;camSnap=true;render();},total:()=>TOTAL,forms:FORMS};
+window.__taichi={seek:t=>{time=t;camSnap=true;render();},ready3d:()=>!!(window.__tc3d&&window.__tc3d.ready),total:()=>TOTAL,forms:FORMS};
 jump(0);time=0.0001;
 if(!reduce)setPlay(false);
 requestAnimationFrame(frame);

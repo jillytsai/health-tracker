@@ -9,23 +9,23 @@
 :root{
   --paper:#eaefeb; --panel:#f6f8f5; --ink:#1c2827; --muted:#5a6966; --line:#cbd6d1;
   --left:#17807a; --right:#c4542c; --accent:#17807a;
-  --torso:#fbfcfa; --torso-edge:#2f3d3b; --skin:#e7c6a4; --hair:#1f2629; --ground:#d5ddd8;
+  --cloth:#fdfdfb; --cloth-edge:#55625f; --left-soft:#d3ebe8; --right-soft:#f6dccf; --skin:#ecc9a6; --skin-edge:#a87b58; --hair:#1f2629; --shoe:#2b3133; --sash:#2b3133; --ground:#d5ddd8;
   --f-display:"Noto Serif TC","Songti TC","PMingLiU",serif;
   --f-body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --paper:#111816; --panel:#18211f; --ink:#e3ebe7; --muted:#97a6a1; --line:#2b3633;
   --left:#4cbab1; --right:#ee865a; --accent:#4cbab1;
-  --torso:#dfe6e2; --torso-edge:#0a0e0d; --skin:#d4ad8b; --hair:#0b0e0f; --ground:#222c29; color-scheme:dark}}
+  --cloth:#e4ebe7; --cloth-edge:#6d7c78; --left-soft:#2f6a65; --right-soft:#7a442e; --skin:#d8b08c; --skin-edge:#7c5739; --hair:#050708; --shoe:#5b6466; --sash:#0b0f0e; --ground:#222c29; color-scheme:dark}}
 :root[data-theme="dark"]{
   --paper:#111816; --panel:#18211f; --ink:#e3ebe7; --muted:#97a6a1; --line:#2b3633;
   --left:#4cbab1; --right:#ee865a; --accent:#4cbab1;
-  --torso:#dfe6e2; --torso-edge:#0a0e0d; --skin:#d4ad8b; --hair:#0b0e0f; --ground:#222c29; color-scheme:dark}
+  --cloth:#e4ebe7; --cloth-edge:#6d7c78; --left-soft:#2f6a65; --right-soft:#7a442e; --skin:#d8b08c; --skin-edge:#7c5739; --hair:#050708; --shoe:#5b6466; --sash:#0b0f0e; --ground:#222c29; color-scheme:dark}
 *{box-sizing:border-box}
 html,body{background:var(--paper);color:var(--ink)}
 body{margin:0;font-family:var(--f-body);font-size:15px;line-height:1.6;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
-  padding-block:12px 120px}
+  padding-block:12px 180px}
 .wrap{max-width:900px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
 header{display:flex;align-items:baseline;justify-content:space-between;gap:8px;flex-wrap:wrap}
 header h1{font-family:var(--f-display);font-size:1.25rem;margin:0;letter-spacing:.08em}
@@ -39,7 +39,7 @@ header small{color:var(--muted);font-size:.8rem}
 .view canvas{display:block;width:100%;aspect-ratio:3/4;max-width:100%}
 .view figcaption{position:absolute;left:8px;top:6px;font-size:.75rem;color:var(--muted);letter-spacing:.06em}
 .view figcaption b{color:var(--ink);font-weight:700}
-.cuebox{display:grid;grid-template-columns:1fr 132px;gap:10px;align-items:stretch}
+.cuebox{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:12px;align-items:start}
 .cuetext{min-width:0;display:flex;flex-direction:column;gap:6px}
 .step{font-size:.78rem;color:var(--muted);font-variant-numeric:tabular-nums}
 #cue{margin:0;font-size:1.08rem;line-height:1.55;font-weight:500;min-height:3.2em}
@@ -47,9 +47,13 @@ header small{color:var(--muted);font-size:.8rem}
 .breath span{display:inline-block;min-width:2.6em;text-align:center;padding:1px 8px;border-radius:99px;border:1px solid var(--line);color:var(--ink);font-weight:700}
 .breath span.in{border-color:var(--left);color:var(--left)}
 .breath span.out{border-color:var(--right);color:var(--right)}
-.map{background:var(--panel);border:1px solid var(--line);border-radius:10px;position:relative;overflow:hidden}
-.map canvas{display:block;width:100%;height:100%;min-height:140px}
-.map span{position:absolute;left:6px;top:4px;font-size:.68rem;color:var(--muted)}
+.tip{margin:4px 0 0;font-size:.86rem;color:var(--muted);line-height:1.6}
+.tip b{color:var(--ink);margin-right:4px}
+.minis{display:grid;grid-template-columns:1fr 1fr;gap:8px;min-width:0}
+.mini{background:var(--panel);border:1px solid var(--line);border-radius:10px;position:relative;overflow:hidden}
+.mini canvas{display:block;width:100%;aspect-ratio:3/4;max-width:100%}
+.mini span{position:absolute;left:6px;top:4px;font-size:.68rem;color:var(--muted)}
+@media (max-width:560px){.cuebox{grid-template-columns:1fr}}
 .scrub{width:100%;accent-color:var(--accent)}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
 .chips button{font:inherit;font-size:.85rem;padding:4px 10px;border-radius:99px;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer}
@@ -71,7 +75,7 @@ details a{color:var(--accent)}
 .opts select{font:inherit;padding:4px 6px;border-radius:8px;border:1px solid var(--line);background:var(--paper);color:var(--ink)}
 .opts label{display:inline-flex;align-items:center;gap:4px;cursor:pointer}
 button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-@media (max-width:420px){.cuebox{grid-template-columns:1fr 104px}#cue{font-size:1rem}}
+
 </style>
 
 <div class="wrap">
@@ -96,8 +100,12 @@ button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visi
       <div class="step" id="step">步驟 1／4</div>
       <p id="cue">併步站立，全身放鬆</p>
       <div class="breath">呼吸 <span id="breath">自然</span></div>
+      <p class="tip"><b>要領</b> <span id="tip"></span></p>
     </div>
-    <div class="map"><canvas id="cvMap" aria-label="腳步俯視圖"></canvas><span>腳步俯視 ↑前</span></div>
+    <div class="minis">
+      <div class="mini"><canvas id="cvSide" aria-label="側面視角動畫"></canvas><span>側面・看鬆腰落胯</span></div>
+      <div class="mini map"><canvas id="cvMap" aria-label="腳步俯視圖"></canvas><span>腳步俯視 ↑前</span></div>
+    </div>
   </section>
 
   <input class="scrub" id="scrub" type="range" min="0" max="1000" value="0" step="1" aria-label="播放進度">
@@ -105,9 +113,11 @@ button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visi
   <nav class="chips" id="chips" aria-label="選擇招式"></nav>
 
   <div class="legend">
-    <span><i style="background:var(--left)"></i>左手・左腳</span>
-    <span><i style="background:var(--right)"></i>右手・右腳</span>
+    <span><i style="background:var(--left)"></i>左手・左腳（袖、褲）</span>
+    <span><i style="background:var(--right)"></i>右手・右腳（袖、褲）</span>
     <span>背面視角的左右和你自己一樣，最適合跟著練</span>
+    <span>掌心朝向你時，手掌上會出現一道掌紋</span>
+    <span>鬆腰落胯：胯根向下坐、尾閭下垂、上身中正，看側面圖的垂直虛線</span>
   </div>
 
   <details>
@@ -129,6 +139,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visi
     <div class="opts">
       <label for="speed">速度</label>
       <select id="speed"><option value="0.5">0.5×</option><option value="0.75">0.75×</option><option value="1" selected>1×</option><option value="1.5">1.5×</option></select>
+      <label><input type="checkbox" id="zoom"> 手部特寫</label>
       <label><input type="checkbox" id="loop"> 重複這一式</label>
       <label><input type="checkbox" id="voice"> 語音口令</label>
     </div>
@@ -217,6 +228,39 @@ const FORMS=[
  {d:2,t:'左腳收回，併步站立，還原',b:'自然',lf:[-0.06,0,0],hip:[-0.12,0.95,0],lh:[0.08,0.78,0.03],rh:[-0.32,0.78,0.03]}]}
 ];
 
+/* 掌型：第一字 = 掌心朝向，第二字 = 指尖方向。f前 b後(朝身體) u上 d下 i向內(朝身體中線) o向外 */
+const PALMS=[
+ [['id','id'],0,['df','df'],['df','df']],
+ [['ui','df'],0,['uf','df'],0,['df','ui'],0,['df','uf'],0,['ui','df'],0,['uf','df']],
+ [['df','ui'],['df','bu'],['df','iu']],
+ [['df','uf'],['df','df'],['df','fu']],
+ [0,['iu','df'],['iu','if']],
+ [['uf','ub'],[0,'df'],['uf','fu'],['ub','uf'],['df',0],['fu','uf']],
+ [['ui','df'],0,['bi','df'],['df','uf'],['bi','uo'],['bi','fu'],['df','df'],['fu','fu']],
+ [['bi','df'],['bu',0],0,['fu',0]],
+ [['di','bu'],['bu','di'],0,['di','bu'],0,['bu','di']],
+ [['uf','uf'],['uf','fu']],
+ [['bu','bu'],['ou','ou'],['bu','bu'],0,['ou','ou'],['df','df']],
+ [['ou','ou'],['ui','ui'],['bu','bu']],
+ [['df','df'],['id','id'],0]
+];
+const TIPS=[
+ '兩臂上舉時肩不聳、肘下垂；下按時屈膝鬆胯，上身保持正直，膝蓋不超過腳尖。',
+ '分手與弓步同時完成；前膝對準腳尖，後腿自然伸直；以腰帶手，不要只動手臂。',
+ '虛步時重心在後腿，前腳只輕點地；右手上提時沉肩，左手下按要坐腕。',
+ '推掌時沉肩垂肘、坐腕舒指；摟手經過膝前，由腰胯帶動手臂。',
+ '兩臂合抱如抱琵琶，左手指尖與鼻同高；重心坐實右腿，胸部放鬆。',
+ '退步時前腳掌先著地再慢慢踏實；兩手交錯而過，推掌與收手同時到位。',
+ '掤、捋、擠、按四法要分清；捋時腰向右轉、重心後坐；按時先沉後推，力由腿起。',
+ '勾手五指撮攏、手腕微屈；推掌、弓步、轉腰同時完成，上身不前傾。',
+ '以腰為軸帶動兩手畫圓，手經過面前時掌心朝內；重心平穩移動，身體不起伏。',
+ '虛步時重心在右腿；推掌時沉肩垂肘，指尖約與眼同高。',
+ '支撐腿微屈站穩；以腳跟慢慢蹬出，腳尖回勾；兩手分開與蹬腳方向一致。',
+ '兩手合抱時兩臂撐圓；起身時頭頂上領，慢慢站直。',
+ '兩手下落時配合呼氣，全身放鬆；併步後靜立片刻再結束。'
+];
+FORMS.forEach((f,i)=>{f.tip=TIPS[i];f.k.forEach((k,j)=>{const p=PALMS[i][j];if(p){if(p[0])k.lp=p[0];if(p[1])k.rp=p[1];}});});
+
 /* ---------- 建立時間軸 ---------- */
 const clone=o=>JSON.parse(JSON.stringify(o));
 const SEGS=[];let TOTAL=0;
@@ -226,7 +270,7 @@ const SEGS=[];let TOTAL=0;
     if(W&&f.anchor){const ft=f.anchor.f==='l'?W.lf:W.rf;off=[ft[0]-f.anchor.at[0],ft[2]-f.anchor.at[1]];}
     f.start=t;
     f.k.forEach((k,ki)=>{
-      const N=W?clone(W):{};N.hook=null;
+      const N=W?clone(W):{lp:'id',rp:'id'};N.hook=null;
       for(const key in k){if(key==='d'||key==='t'||key==='b')continue;const v=k[key];
         N[key]=Array.isArray(v)?[v[0]+off[0],v[1],v[2]+off[1]]:v;}
       SEGS.push({fi,ki,start:t,dur:k.d,from:W||N,to:N,t:k.t,b:k.b});
@@ -236,6 +280,16 @@ const SEGS=[];let TOTAL=0;
   });
   TOTAL=t;
 })();
+
+/* ---------- 向量 ---------- */
+const add=(a,b)=>[a[0]+b[0],a[1]+b[1],a[2]+b[2]],sub=(a,b)=>[a[0]-b[0],a[1]-b[1],a[2]-b[2]],
+  mul=(a,s)=>[a[0]*s,a[1]*s,a[2]*s],dot=(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2],
+  len=a=>Math.hypot(a[0],a[1],a[2]),norm=a=>{const l=len(a)||1;return mul(a,1/l)},
+  cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];
+const Fw=a=>[Math.sin(a),0,Math.cos(a)],Lv=a=>[Math.cos(a),0,-Math.sin(a)];
+/* 掌型字母 → 以胸口方向為準的局部向量 [左右(+左), 上下, 前後] ；i/o 依左右手不同 */
+function palmLocal(code,side){const m={f:[0,0,1],b:[0,0,-1],u:[0,1,0],d:[0,-1,0],i:[-side,0,0],o:[side,0,0]};
+  return [m[code[0]],m[code[1]]];}
 
 /* ---------- 插值 ---------- */
 const ease=u=>u<0?0:u>1?1:u*u*(3-2*u);
@@ -248,15 +302,15 @@ function poseAt(time){
   for(const key of ['cy','lfy','rfy'])P[key]=lerp(A[key]||0,B[key]||0,u);
   for(const f of ['lf','rf']){const d=Math.hypot(A[f][0]-B[f][0],A[f][2]-B[f][2]);
     if(d>0.04)P[f][1]+=Math.sin(Math.PI*u)*Math.min(0.1,0.04+d*0.1);}
+  for(const [k,side] of [['lp',1],['rp',-1]]){const a=palmLocal(A[k],side),b=palmLocal(B[k],side);
+    let n=norm(add(lerp3(a[0],b[0],u),[0.001,0.002,0.001])),f=lerp3(a[1],b[1],u);
+    f=sub(f,mul(n,dot(f,n)));if(len(f)<0.05)f=cross(n,[0,0,1]);P[k]={n,f:norm(f)};}
   P.hook=B.hook||(u<0.5?A.hook:null);
+  P.sink=Math.max(0,Math.min(1,(0.95-P.hip[1])/0.1));
   return P;
 }
 
 /* ---------- 骨架 ---------- */
-const add=(a,b)=>[a[0]+b[0],a[1]+b[1],a[2]+b[2]],sub=(a,b)=>[a[0]-b[0],a[1]-b[1],a[2]-b[2]],
-  mul=(a,s)=>[a[0]*s,a[1]*s,a[2]*s],dot=(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2],
-  len=a=>Math.hypot(a[0],a[1],a[2]),norm=a=>{const l=len(a)||1;return mul(a,1/l)};
-const Fw=a=>[Math.sin(a),0,Math.cos(a)],Lv=a=>[Math.cos(a),0,-Math.sin(a)];
 function ik(A,T,l1,l2,P){
   const d=sub(T,A);let dist=len(d);const dir=norm(d);
   dist=Math.max(Math.abs(l1-l2)+1e-3,Math.min((l1+l2)*0.999,dist));
@@ -265,76 +319,125 @@ function ik(A,T,l1,l2,P){
   return [add(A,add(mul(dir,a),mul(pv,h))),add(A,mul(dir,dist))];
 }
 function skeleton(p){
-  const cy=p.cy*DEG,hy=p.cy*0.5*DEG,H=p.hip,Lh=Lv(hy),Lc=Lv(cy),Fc=Fw(cy);
-  const hipL=add(H,[Lh[0]*0.1,-0.03,Lh[2]*0.1]),hipR=add(H,[-Lh[0]*0.1,-0.03,-Lh[2]*0.1]);
-  const neck=[H[0]+Fc[0]*0.02,H[1]+0.5,H[2]+Fc[2]*0.02];
-  const shL=add(neck,[Lc[0]*0.19,-0.05,Lc[2]*0.19]),shR=add(neck,[-Lc[0]*0.19,-0.05,-Lc[2]*0.19]);
-  const head=[neck[0],neck[1]+0.15,neck[2]];
-  const arm=(sh,hand,s)=>ik(sh,hand,0.29,0.29,add(sh,[Lc[0]*0.18*s-Fc[0]*0.3,-0.6,Lc[2]*0.18*s-Fc[2]*0.3]));
-  const [elL,haL]=arm(shL,p.lh,1),[elR,haR]=arm(shR,p.rh,-1);
-  const leg=(hj,foot,fy,s)=>{const ank=[foot[0],foot[1]+0.07,foot[2]],ff=Fw(fy*DEG);
-    const [kn,an]=ik(hj,ank,0.45,0.45,add(hj,[ff[0]*0.8+Lh[0]*0.12*s,-0.3,ff[2]*0.8+Lh[2]*0.12*s]));
-    const base=[an[0],an[1]-0.05,an[2]];
-    return {kn,an,toe:add(base,mul(ff,0.15)),heel:add(base,mul(ff,-0.05))};};
-  return {H,hipL,hipR,neck,shL,shR,head,Fc,Lc,elL,haL,elR,haR,L:leg(hipL,p.lf,p.lfy,1),R:leg(hipR,p.rf,p.rfy,-1),hook:p.hook};
+  const cy=p.cy*DEG,hy=p.cy*0.5*DEG,H=p.hip,Lh=Lv(hy),Fh=Fw(hy),Lc=Lv(cy),Fc=Fw(cy),Lw=Lv((cy+hy)/2),Fwst=Fw((cy+hy)/2);
+  const tuck=p.sink*0.025; /* 落胯：尾閭微收，骨盆稍向後下坐 */
+  const hipL=add(H,[Lh[0]*0.1-Fh[0]*tuck,-0.04,Lh[2]*0.1-Fh[2]*tuck]),hipR=add(H,[-Lh[0]*0.1-Fh[0]*tuck,-0.04,-Lh[2]*0.1-Fh[2]*tuck]);
+  const waist=add(H,[0,0.13,0]);
+  const neck=[H[0]+Fc[0]*0.01,H[1]+0.5,H[2]+Fc[2]*0.01];
+  const shL=add(neck,[Lc[0]*0.18,-0.05,Lc[2]*0.18]),shR=add(neck,[-Lc[0]*0.18,-0.05,-Lc[2]*0.18]);
+  const head=[neck[0]+Fc[0]*0.01,neck[1]+0.15,neck[2]+Fc[2]*0.01];
+  const arm=(sh,hand,s)=>ik(sh,hand,0.29,0.27,add(sh,[Lc[0]*0.18*s-Fc[0]*0.3,-0.6,Lc[2]*0.18*s-Fc[2]*0.3]));
+  const [elL,wrL]=arm(shL,p.lh,1),[elR,wrR]=arm(shR,p.rh,-1);
+  const toWorld=v=>[Lc[0]*v[0]+Fc[0]*v[2],v[1],Lc[2]*v[0]+Fc[2]*v[2]];
+  const hand=(wr,pl,side,hook)=>({wr,n:toWorld(pl.n),f:toWorld(pl.f),side,hook});
+  const leg=(hj,foot,fy,s)=>{const ank=[foot[0],foot[1]+0.075,foot[2]],ff=Fw(fy*DEG);
+    const [kn,an]=ik(hj,ank,0.45,0.44,add(hj,[ff[0]*0.8+Lh[0]*0.1*s,-0.3,ff[2]*0.8+Lh[2]*0.1*s]));
+    const base=[an[0],an[1]-0.055,an[2]];
+    return {hj,kn,an,toe:add(base,mul(ff,0.17)),heel:add(base,mul(ff,-0.05))};};
+  return {H,hipL,hipR,waist,neck,shL,shR,head,Fc,Lc,Lh,Lw,Fwst,elL,elR,
+    hL:hand(wrL,p.lp,1,p.hook==='l'),hR:hand(wrR,p.rp,-1,p.hook==='r'),
+    L:leg(hipL,p.lf,p.lfy,1),R:leg(hipR,p.rf,p.rfy,-1),sink:p.sink,feetMid:lerp3(p.lf,p.rf,0.5)};
 }
 
 /* ---------- 繪圖 ---------- */
 const $=id=>document.getElementById(id);
-const cvF=$('cvFront'),cvB=$('cvBack'),cvM=$('cvMap');
+const cvF=$('cvFront'),cvB=$('cvBack'),cvS=$('cvSide'),cvM=$('cvMap');
 let C={};
 function readColors(){const cs=getComputedStyle(document.documentElement);
-  for(const k of ['paper','panel','ink','muted','line','left','right','torso','torso-edge','skin','hair','ground'])C[k]=cs.getPropertyValue('--'+k).trim();}
+  for(const k of ['paper','panel','ink','muted','line','left','right','left-soft','right-soft','cloth','cloth-edge','skin','skin-edge','hair','shoe','ground','sash'])C[k]=cs.getPropertyValue('--'+k).trim();}
 function fit(cv){const r=cv.getBoundingClientRect(),dpr=Math.min(window.devicePixelRatio||1,2);
   const w=Math.max(1,Math.round(r.width*dpr)),h=Math.max(1,Math.round(r.height*dpr));
   if(cv.width!==w||cv.height!==h){cv.width=w;cv.height=h;}return [w,h];}
-const cam={x:0,z:0};
-function drawView(cv,back,sk){
+const VIEWS={front:{r:[1,0,0],c:[0,0,1]},back:{r:[-1,0,0],c:[0,0,-1]},side:{r:[0,0,-1],c:[1,0,0]}};
+const cam={x:0,y:0.95,z:0,zoom:1};
+function drawView(cv,view,sk,zoomed){
   const [W,Hh]=fit(cv),ctx=cv.getContext('2d');ctx.clearRect(0,0,W,Hh);
-  const S=Hh/2.15,D=6,cx=W/2,eyeY=Hh*0.47;
-  const pr=P=>{const rz=P[2]-cam.z,k=back?D/(D+rz):D/(D-rz),x=(P[0]-cam.x)*(back?-1:1);
-    return [cx+x*S*k,eyeY-(P[1]-1.0)*S*k,k];};
-  // ground
-  const g=pr([cam.x,0,cam.z]);
-  ctx.fillStyle=C.ground;ctx.beginPath();ctx.ellipse(cx,g[1]+S*0.02,W*0.42,S*0.09,0,0,Math.PI*2);ctx.fill();
-  for(const ft of [sk.L,sk.R]){const s=pr([ft.an[0],0,ft.an[2]]);ctx.fillStyle=C.line;ctx.beginPath();
-    ctx.ellipse(s[0],s[1],S*0.07*s[2],S*0.018*s[2],0,0,Math.PI*2);ctx.globalAlpha=0.9;ctx.fill();ctx.globalAlpha=1;}
-  const items=[],dz=z=>back?-z:z;
-  const lim=(a,b,col,w,extra)=>items.push({z:dz((a[2]+b[2])/2),f:(fade)=>{const A=pr(a),B=pr(b);
-    ctx.strokeStyle=col;ctx.globalAlpha=fade;ctx.lineCap='round';ctx.lineWidth=w*S*(A[2]+B[2])/2;
-    ctx.beginPath();ctx.moveTo(A[0],A[1]);ctx.lineTo(B[0],B[1]);ctx.stroke();extra&&extra(A,B);ctx.globalAlpha=1;}});
-  const handDot=(isHook,col)=>(A,B)=>{ctx.fillStyle=col;ctx.beginPath();ctx.arc(B[0],B[1],0.042*S*B[2],0,Math.PI*2);ctx.fill();
-    if(isHook){ctx.lineWidth=0.025*S*B[2];ctx.beginPath();ctx.arc(B[0],B[1]+0.04*S*B[2],0.035*S*B[2],-Math.PI*0.2,Math.PI*1.1);ctx.stroke();}};
-  // legs
-  for(const [leg,hj,col] of [[sk.L,sk.hipL,C.left],[sk.R,sk.hipR,C.right]]){
-    lim(hj,leg.kn,col,0.12);lim(leg.kn,leg.an,col,0.095);lim(leg.heel,leg.toe,col,0.07);}
-  // arms
-  const n0=items.length;
-  lim(sk.shL,sk.elL,C.left,0.085);lim(sk.elL,sk.haL,C.left,0.07,handDot(sk.hook==='l',C.left));
-  lim(sk.shR,sk.elR,C.right,0.085);lim(sk.elR,sk.haR,C.right,0.07,handDot(sk.hook==='r',C.right));
-  for(let i=n0;i<items.length;i++)items[i].arm=true;
-  // torso
-  const tz=(sk.shL[2]+sk.shR[2]+sk.hipL[2]+sk.hipR[2])/4;
-  items.push({z:dz(tz),torso:true,f:()=>{const pts=[sk.shL,sk.shR,sk.hipR,sk.hipL].map(pr);
-    ctx.fillStyle=C.torso;ctx.strokeStyle=C['torso-edge'];ctx.lineWidth=Math.max(1,S*0.008);ctx.lineJoin='round';
-    ctx.beginPath();pts.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.closePath();ctx.fill();ctx.stroke();
-    const n=pr(sk.neck),h=pr(sk.head);ctx.strokeStyle=C.skin;ctx.lineWidth=0.06*S*n[2];ctx.lineCap='round';
-    ctx.beginPath();ctx.moveTo(n[0],n[1]);ctx.lineTo(h[0],h[1]+0.06*S);ctx.stroke();
-    // 腰帶
-    const a=pr(lerp3(sk.shL,sk.hipL,0.78)),b=pr(lerp3(sk.shR,sk.hipR,0.78));ctx.strokeStyle=C['torso-edge'];ctx.lineWidth=S*0.012;
-    ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1]);ctx.stroke();}});
-  // head
-  items.push({z:dz(sk.head[2])+0.001,f:()=>{const h=pr(sk.head),r=0.1*S*h[2];
-    const Fh=sk.Fc,facing=back?-Fh[2]:Fh[2],lat=(back?-Fh[0]:Fh[0]);
-    ctx.fillStyle=C.skin;ctx.beginPath();ctx.arc(h[0],h[1],r,0,Math.PI*2);ctx.fill();
-    ctx.save();ctx.beginPath();ctx.arc(h[0],h[1],r,0,Math.PI*2);ctx.clip();
-    ctx.fillStyle=C.hair;ctx.beginPath();ctx.arc(h[0]-lat*r*0.8,h[1]-r*0.78*Math.max(0,facing),r*1.02,0,Math.PI*2);ctx.fill();ctx.restore();
-    if(facing>0.15){const L=sk.Lc;ctx.fillStyle=C.hair;for(const s of [1,-1]){
-      const e=pr(add(sk.head,[Fh[0]*0.09+L[0]*0.038*s,-0.005,Fh[2]*0.09+L[2]*0.038*s]));
-      ctx.beginPath();ctx.arc(e[0],e[1],Math.max(1,0.011*S),0,Math.PI*2);ctx.fill();}}
-    ctx.strokeStyle=C['torso-edge'];ctx.lineWidth=Math.max(1,S*0.006);ctx.beginPath();ctx.arc(h[0],h[1],r,0,Math.PI*2);ctx.stroke();}});
+  const V=VIEWS[view],D=6,cx=W/2;
+  const S=zoomed?Hh/1.55:Hh/2.12, focusY=zoomed?1.18:1.0, eyeY=zoomed?Hh*0.46:Hh*0.47;
+  const ctr=zoomed?[ (sk.shL[0]+sk.shR[0])/2,0,(sk.shL[2]+sk.shR[2])/2 ]:[cam.x,0,cam.z];
+  const pr=P=>{const q=sub(P,ctr),depth=dot(q,V.c),k=D/(D-depth);return [cx+dot(q,V.r)*S*k,eyeY-(P[1]-focusY)*S*k,k,depth];};
+  const rad=(m,k)=>m*S*k;
+  // 地面
+  if(!zoomed){const g=pr([ctr[0],0,ctr[2]]);ctx.fillStyle=C.ground;ctx.beginPath();ctx.ellipse(cx,g[1]+S*0.02,W*0.42,S*0.08,0,0,Math.PI*2);ctx.fill();}
+  const items=[];
+  const capsule=(A,B,ra,rb,fill,stroke)=>{const a=pr(A),b=pr(B),r1=rad(ra,a[2]),r2=rad(rb,b[2]);
+    const ang=Math.atan2(b[1]-a[1],b[0]-a[0]);ctx.beginPath();
+    ctx.arc(a[0],a[1],r1,ang+Math.PI/2,ang+Math.PI*1.5);ctx.arc(b[0],b[1],r2,ang-Math.PI/2,ang+Math.PI/2);ctx.closePath();
+    ctx.fillStyle=fill;ctx.fill();if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=Math.max(1,S*0.006);ctx.stroke();}};
+  const poly=(pts,fill,stroke)=>{const q=pts.map(pr);ctx.beginPath();q.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.closePath();
+    ctx.fillStyle=fill;ctx.fill();if(stroke){ctx.strokeStyle=stroke;ctx.lineJoin='round';ctx.lineWidth=Math.max(1,S*0.006);ctx.stroke();}};
+  const depthOf=(...P)=>P.reduce((s,p)=>s+dot(sub(p,ctr),V.c),0)/P.length;
+  const push=(z,f,tag)=>items.push({z,f,tag});
+  // 腿（寬褲）
+  for(const [lg,soft,edge] of [[sk.L,C['left-soft'],C.left],[sk.R,C['right-soft'],C.right]]){
+    push(depthOf(lg.hj,lg.kn),()=>capsule(lg.hj,lg.kn,0.085,0.068,soft,edge));
+    push(depthOf(lg.kn,lg.an),()=>capsule(lg.kn,add(lg.an,[0,0.02,0]),0.066,0.058,soft,edge));
+    push(depthOf(lg.heel,lg.toe)+0.001,()=>capsule(lg.heel,lg.toe,0.035,0.03,C.shoe,null));
+  }
+  // 骨盆與腰帶
+  const pel=[add(sk.waist,mul(sk.Lw,0.145)),add(sk.waist,mul(sk.Lw,-0.145)),add(sk.hipR,mul(sk.Lh,-0.085)),add(sk.hipR,[0,-0.06,0]),add(sk.hipL,[0,-0.06,0]),add(sk.hipL,mul(sk.Lh,0.085))];
+  const torsoZ=depthOf(sk.shL,sk.shR,sk.hipL,sk.hipR);
+  push(depthOf(sk.waist,sk.hipL,sk.hipR),()=>poly(pel,C.cloth,C['cloth-edge']),'body');
+  // 上身（對襟上衣）
+  const chest=[add(sk.shL,[0,0.02,0]),add(sk.neck,[0,0.01,0]),add(sk.shR,[0,0.02,0]),add(sk.shR,add(mul(sk.Lc,0.02),[0,-0.12,0])),add(sk.waist,mul(sk.Lw,-0.15)),add(sk.waist,mul(sk.Lw,0.15)),add(sk.shL,add(mul(sk.Lc,-0.02),[0,-0.12,0]))];
+  push(torsoZ+0.002,()=>{poly(chest,C.cloth,C['cloth-edge']);
+    const a=pr(add(sk.waist,mul(sk.Lw,0.15))),b=pr(add(sk.waist,mul(sk.Lw,-0.15)));ctx.strokeStyle=C.sash;ctx.lineCap='round';ctx.lineWidth=rad(0.03,a[2]);
+    ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1]);ctx.stroke();
+    // 中線（對襟）
+    const n=pr(add(sk.neck,mul(sk.Fc,0.09))),w=pr(add(sk.waist,mul(sk.Fwst,0.1)));const vis=dot(sk.Fc,V.c);
+    if(vis>0.2){ctx.strokeStyle=C['cloth-edge'];ctx.lineWidth=Math.max(1,S*0.004);ctx.beginPath();ctx.moveTo(n[0],n[1]+rad(0.03,n[2]));ctx.lineTo(w[0],w[1]);ctx.stroke();}},'body');
+  // 手臂（袖子）+ 手掌
+  for(const [sh,el,hd,soft,edge] of [[sk.shL,sk.elL,sk.hL,C['left-soft'],C.left],[sk.shR,sk.elR,sk.hR,C['right-soft'],C.right]]){
+    push(depthOf(sh,el),()=>capsule(sh,el,0.058,0.05,soft,edge),'arm');
+    push(depthOf(el,hd.wr),()=>capsule(el,add(hd.wr,mul(norm(sub(hd.wr,el)),-0.02)),0.05,0.042,soft,edge),'arm');
+    push(depthOf(hd.wr,add(hd.wr,mul(hd.f,0.08)))+0.004,()=>drawHand(hd),'arm');
+  }
+  function drawHand(h){
+    const sc=1.2; /* 手掌略放大，方便看清掌型 */
+    let f=h.f,n=h.n;if(h.hook){f=norm(add(mul(f,0.2),[0,-1,0]));n=norm(sub(n,mul(f,dot(n,f))));}
+    const s=h.side===1?cross(n,f):cross(f,n); /* 拇指側 */
+    const W0=h.wr,pw=0.04*sc,pl=0.085*sc;
+    const base=add(W0,mul(f,0.012));
+    const palm=[add(base,mul(s,pw)),add(add(base,mul(f,pl)),mul(s,pw*0.95)),add(add(base,mul(f,pl)),mul(s,-pw*0.95)),add(base,mul(s,-pw*0.9))];
+    const lineW=k=>Math.max(1,S*0.004);
+    // 手腕
+    const w0=pr(W0),wb=pr(base);
+    poly(palm,C.skin,C['skin-edge']);
+    const tipDir=h.hook?norm(add(f,mul(s,0))):f;
+    const fingers=[0.75,0.25,-0.25,-0.75].map((o,i)=>{const root=add(add(base,mul(f,pl)),mul(s,pw*o*0.95));
+      const L=(h.hook?0.05:[0.07,0.08,0.075,0.06][i])*sc;
+      const tip=h.hook?add(add(base,mul(f,pl+0.05*sc)),mul(n,-0.0)):add(root,add(mul(tipDir,L),mul(s,o*0.008)));
+      return [root,tip];});
+    // 拇指：手背面朝鏡頭時先畫拇指
+    const thumbRoot=add(base,add(mul(s,pw*0.9),mul(f,0.02))),thumbTip=h.hook?add(add(base,mul(f,pl+0.05*sc)),mul(s,0.005)):add(thumbRoot,add(mul(f,0.04*sc),add(mul(s,0.035*sc),mul(n,0.012))));
+    const drawF=(a,b,r)=>capsule(a,b,r,r*0.85,C.skin,C['skin-edge']);
+    fingers.forEach(([a,b])=>drawF(a,b,0.0105*sc));
+    drawF(thumbRoot,thumbTip,0.012*sc);
+    // 掌心朝鏡頭時加一道掌紋，幫助分辨掌心/掌背
+    if(dot(n,V.c)>0.35&&!h.hook){const c1=pr(add(add(base,mul(f,pl*0.45)),mul(s,pw*0.6))),c2=pr(add(add(base,mul(f,pl*0.65)),mul(s,-pw*0.6)));
+      ctx.strokeStyle=C['skin-edge'];ctx.lineWidth=lineW();ctx.beginPath();ctx.moveTo(c1[0],c1[1]);ctx.quadraticCurveTo((c1[0]+c2[0])/2,(c1[1]+c2[1])/2+rad(0.012,c1[2]),c2[0],c2[1]);ctx.stroke();}
+  }
+  // 頸與頭
+  push(depthOf(sk.head)+0.003,()=>{
+    capsule(sk.neck,add(sk.neck,[0,0.09,0]),0.04,0.04,C.skin,null);
+    const h=pr(sk.head),r=rad(0.1,h[2]),Fhd=sk.Fc,facing=dot(Fhd,V.c),lat=dot(Fhd,V.r);
+    ctx.fillStyle=C.skin;ctx.beginPath();ctx.ellipse(h[0],h[1],r*0.9,r*1.08,0,0,Math.PI*2);ctx.fill();
+    ctx.save();ctx.beginPath();ctx.ellipse(h[0],h[1],r*0.9,r*1.08,0,0,Math.PI*2);ctx.clip();
+    ctx.fillStyle=C.hair;ctx.beginPath();ctx.ellipse(h[0]-lat*r*0.75,h[1]-r*0.85*Math.max(0,facing)-r*0.1,r*0.98,r*1.08,0,0,Math.PI*2);ctx.fill();ctx.restore();
+    // 髮髻
+    const bun=pr(add(sk.head,add(mul(Fhd,-0.07),[0,0.09,0])));ctx.fillStyle=C.hair;ctx.beginPath();ctx.arc(bun[0],bun[1],rad(0.04,bun[2]),0,Math.PI*2);ctx.fill();
+    if(facing>0.1){const L=sk.Lc;ctx.fillStyle=C.hair;for(const s of [1,-1]){
+      const e=pr(add(sk.head,[Fhd[0]*0.09+L[0]*0.036*s,-0.005,Fhd[2]*0.09+L[2]*0.036*s]));
+      ctx.beginPath();ctx.ellipse(e[0],e[1],Math.max(1,rad(0.012,e[2])),Math.max(1,rad(0.007,e[2])),0,0,Math.PI*2);ctx.fill();}}
+    if(Math.abs(lat)>0.6&&facing>-0.3){const nz=pr(add(sk.head,add(mul(Fhd,0.105),[0,-0.02,0])));ctx.fillStyle=C.skin;ctx.beginPath();ctx.arc(nz[0],nz[1],rad(0.018,nz[2]),0,Math.PI*2);ctx.fill();}
+    ctx.strokeStyle=C['skin-edge'];ctx.lineWidth=Math.max(1,S*0.004);ctx.beginPath();ctx.ellipse(h[0],h[1],r*0.9,r*1.08,0,0,Math.PI*2);ctx.stroke();},'head');
   items.sort((a,b)=>a.z-b.z);
-  for(const it of items){const behind=it.arm&&it.z<dz(tz)-0.06;it.f(behind?0.55:1);}
+  for(const it of items){ctx.globalAlpha=(it.tag==='arm'&&it.z<torsoZ-0.08)?0.6:1;it.f();ctx.globalAlpha=1;}
+  // 側面：立身中正的鉛垂線與落胯提示
+  if(view==='side'&&!zoomed){const top=pr(add(sk.head,[0,0.12,0])),bot=pr([sk.feetMid[0],0,sk.feetMid[2]]),hp=pr(sk.H);
+    ctx.setLineDash([4,4]);ctx.strokeStyle=C.muted;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(top[0],top[1]);ctx.lineTo(top[0],bot[1]);ctx.stroke();ctx.setLineDash([]);
+    if(sk.sink>0.4){ctx.fillStyle=C.right;ctx.font=`${Math.round(S*0.065)}px ${getComputedStyle(document.body).fontFamily}`;ctx.textAlign='left';
+      ctx.fillText('落胯 ↓',hp[0]+rad(0.16,hp[2]),hp[1]);}}
 }
 const formFeet=FORMS.map(f=>{const pts=[];SEGS.filter(s=>s.fi===FORMS.indexOf(f)).forEach(s=>{
   pts.push({p:s.to.lf,y:s.to.lfy,s:'l'},{p:s.to.rf,y:s.to.rfy,s:'r'});});
@@ -373,18 +476,19 @@ function speak(txt){if(!$('voice').checked)return;try{const sy=window.speechSynt
   const u=new SpeechSynthesisUtterance(txt.replace(/【|】/g,''));u.lang='zh-TW';u.rate=0.95;sy.speak(u);}catch(e){}}
 function updateText(s){
   const f=FORMS[s.fi];
-  if(s.fi!==lastFi){$('formName').textContent=f.n;$('formEn').textContent=f.en;$('formNum').textContent='第 '+(s.fi+1)+' 式／共 '+FORMS.length+' 式';
+  if(s.fi!==lastFi){$('formName').textContent=f.n;$('tip').textContent=f.tip;$('formEn').textContent=f.en;$('formNum').textContent='第 '+(s.fi+1)+' 式／共 '+FORMS.length+' 式';
     [...chips.children].forEach((b,i)=>b.setAttribute('aria-current',i===s.fi?'true':'false'));lastFi=s.fi;}
   if(s!==lastSeg){$('cue').textContent=s.t;$('step').textContent='步驟 '+(s.ki+1)+'／'+f.k.length;
     const br=$('breath');br.textContent=s.b==='—'?'移步':s.b;br.className=s.b==='吸'?'in':s.b==='呼'?'out':'';
     if(playing)speak((s.ki===0?f.n+'。':'')+s.t);lastSeg=s;}
 }
+let zoomed=false;
 function render(){
   readColors();
   const p=poseAt(time),sk=skeleton(p);
   const tx=(p.lf[0]+p.rf[0])/2*0.6,tz=(p.lf[2]+p.rf[2])/2;
   if(camSnap){cam.x=tx;cam.z=tz;camSnap=false;}else{cam.x+=(tx-cam.x)*0.04;cam.z+=(tz-cam.z)*0.04;}
-  drawView(cvF,false,sk);drawView(cvB,true,sk);
+  drawView(cvF,'front',sk,zoomed);drawView(cvB,'back',sk,zoomed);drawView(cvS,'side',sk,false);
   const s=segAt(time);drawMap(s.fi,p);updateText(s);
   $('scrub').value=Math.round(time/TOTAL*1000);
 }
@@ -400,6 +504,7 @@ $('prev').onclick=()=>{const fi=curForm(),inForm=time-FORMS[fi].start;jump(inFor
 $('next').onclick=()=>jump(curForm()+1);
 $('speed').onchange=e=>{speed=+e.target.value;};
 $('scrub').oninput=e=>{time=Math.min(TOTAL-0.0001,e.target.value/1000*TOTAL);camSnap=true;};
+$('zoom').onchange=e=>{zoomed=e.target.checked;};
 $('voice').onchange=e=>{if(e.target.checked&&lastSeg)speak(lastSeg.t);};
 document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT'||e.target.tagName==='SELECT')return;
   if(e.code==='Space'){e.preventDefault();$('play').click();}else if(e.key==='ArrowRight')$('next').click();else if(e.key==='ArrowLeft')$('prev').click();});

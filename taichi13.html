@@ -60,6 +60,8 @@ header small{color:var(--muted);font-size:.8rem}
 .chips button[aria-current="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
 .legend{display:flex;flex-wrap:wrap;gap:14px;font-size:.82rem;color:var(--muted)}
 .legend i{display:inline-block;width:18px;height:6px;border-radius:3px;vertical-align:middle;margin-right:6px}
+.vid h3{font-family:var(--f-display);font-size:1rem;margin:0 0 6px;letter-spacing:.06em}
+.vid video{display:block;width:100%;max-width:420px;border-radius:10px;border:1px solid var(--line);background:var(--panel)}
 details{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 14px}
 details summary{cursor:pointer;font-weight:700}
 details p,details li{color:var(--muted);font-size:.88rem;max-width:65ch}
@@ -119,6 +121,11 @@ button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visi
     <span>掌心朝向你時，手掌上會出現一道掌紋</span>
     <span>鬆腰落胯：胯根向下坐、尾閭下垂、上身中正，看側面圖的垂直虛線</span>
   </div>
+
+  <section class="vid">
+    <h3>教學影片（MP4，約 2 分鐘）</h3>
+    <video id="vid" controls playsinline preload="metadata" src="taichi13.mp4"></video>
+  </section>
 
   <details>
     <summary>這套十三式的編排與練習提醒</summary>
